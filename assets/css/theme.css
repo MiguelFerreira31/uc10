@@ -1,0 +1,380 @@
+/* ==========================================================================
+   theme.css — tokens, tipografia e ajustes sobre o Bootstrap 5.3
+   UC10 · Desenvolver banco de dados · SENAC
+   Carregar SEMPRE depois do bootstrap.min.css
+   ========================================================================== */
+
+:root {
+  /* Tipografia */
+  --uc-fonte-texto: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --uc-fonte-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  /* Paleta do terminal — imutavel nos dois temas */
+  --uc-term-bg: #0b0e14;
+  --uc-term-chrome: #131720;
+  --uc-term-borda: #232a3a;
+  --uc-term-texto: #d9e0ee;
+  --uc-term-fraco: #7c869c;
+  --uc-term-prompt: #4b7bec;
+  --uc-term-ok: #46b17b;
+  --uc-term-erro: #e5534b;
+  --uc-term-alerta: #d29922;
+  --uc-term-selecao: #1f3a63;
+
+  /* Realce de sintaxe T-SQL */
+  --uc-sql-keyword: #7aa2f7;
+  --uc-sql-tipo: #2ac3de;
+  --uc-sql-string: #9ece6a;
+  --uc-sql-numero: #ff9e64;
+  --uc-sql-comentario: #6b7689;
+  --uc-sql-funcao: #bb9af7;
+  --uc-sql-variavel: #e0af68;
+  --uc-sql-operador: #89ddff;
+
+  /* Cores semanticas dos blocos didaticos */
+  --uc-cor-info: #3d8bfd;
+  --uc-cor-atencao: #d29922;
+  --uc-cor-perigo: #e5534b;
+  --uc-cor-sucesso: #2ea36a;
+  --uc-cor-conceito: #a371f7;
+
+  /* Ritmo vertical e formas */
+  --uc-raio: 0.5rem;
+  --uc-raio-sm: 0.3rem;
+  --uc-sidebar-larg: 19rem;
+  --uc-navbar-alt: 3.5rem;
+  --uc-medida: 74ch;
+}
+
+/* Tema escuro (padrao) --------------------------------------------------- */
+[data-bs-theme="dark"] {
+  --bs-body-bg: #0f131a;
+  --bs-body-color: #d3d9e4;
+  --bs-emphasis-color: #f2f5fa;
+  --bs-border-color: #2a3140;
+  --bs-secondary-bg: #161b24;
+  --bs-tertiary-bg: #1b2230;
+  --bs-link-color-rgb: 122, 162, 247;
+  --bs-link-hover-color-rgb: 158, 187, 255;
+  --uc-superficie: #141922;
+  --uc-superficie-2: #1a2029;
+  --uc-sombra: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.45);
+}
+
+/* Tema claro — o terminal continua escuro -------------------------------- */
+[data-bs-theme="light"] {
+  --bs-body-bg: #f7f8fa;
+  --bs-body-color: #1f2430;
+  --bs-border-color: #d8dde6;
+  --bs-secondary-bg: #eef1f5;
+  --bs-tertiary-bg: #e9edf3;
+  --uc-superficie: #ffffff;
+  --uc-superficie-2: #f1f3f7;
+  --uc-sombra: 0 0.5rem 1.5rem rgba(15, 20, 30, 0.09);
+  --uc-cor-info: #0b5ed7;
+  --uc-cor-atencao: #8a5d00;
+  --uc-cor-perigo: #b42318;
+  --uc-cor-sucesso: #16794c;
+  --uc-cor-conceito: #6f42c1;
+}
+
+/* Base ------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--uc-navbar-alt) + 1rem);
+}
+
+body {
+  font-family: var(--uc-fonte-texto);
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
+  padding-top: var(--uc-navbar-alt);
+}
+
+code, kbd, samp, pre { font-family: var(--uc-fonte-mono); }
+
+h1, h2, h3, h4, h5 { font-weight: 650; letter-spacing: -0.015em; line-height: 1.25; }
+h1 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.15rem); }
+h2 { font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.65rem); margin-top: 2.75rem; }
+h3 { font-size: 1.18rem; margin-top: 1.9rem; }
+h4 { font-size: 1.02rem; margin-top: 1.4rem; }
+
+main p, main li { max-width: var(--uc-medida); }
+main p { margin-bottom: 1rem; }
+
+/* Codigo inline */
+:not(pre) > code {
+  font-size: 0.875em;
+  padding: 0.12em 0.36em;
+  border-radius: var(--uc-raio-sm);
+  background: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-emphasis-color);
+  word-break: break-word;
+}
+
+/* Acessibilidade --------------------------------------------------------- */
+.uc-skip {
+  position: absolute;
+  left: 0.5rem;
+  top: -4rem;
+  z-index: 2000;
+  padding: 0.6rem 1rem;
+  border-radius: var(--uc-raio);
+  background: var(--uc-cor-info);
+  color: #fff;
+  font-weight: 600;
+  transition: top 0.15s ease-in-out;
+}
+.uc-skip:focus { top: 0.5rem; color: #fff; }
+
+:focus-visible { outline: 3px solid #7aa2f7; outline-offset: 2px; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Navbar ----------------------------------------------------------------- */
+.uc-navbar {
+  height: var(--uc-navbar-alt);
+  background: var(--uc-superficie);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.uc-navbar .navbar-brand { font-weight: 700; letter-spacing: -0.02em; font-size: 1rem; }
+.uc-brand-uc {
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.14rem 0.4rem;
+  margin-right: 0.5rem;
+  border-radius: var(--uc-raio-sm);
+  background: var(--uc-cor-info);
+  color: #fff;
+}
+.uc-progresso-global {
+  position: fixed;
+  top: var(--uc-navbar-alt);
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 1035;
+  background: transparent;
+  pointer-events: none;
+}
+.uc-progresso-global > div {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #2ea36a, #7aa2f7);
+  transition: width 0.25s ease-out;
+}
+
+/* Sidebar ---------------------------------------------------------------- */
+.uc-sidebar {
+  width: var(--uc-sidebar-larg);
+  border-right: 1px solid var(--bs-border-color);
+  background: var(--uc-superficie);
+}
+@media (min-width: 992px) {
+  .uc-sidebar {
+    position: fixed;
+    top: var(--uc-navbar-alt);
+    bottom: 0;
+    left: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .uc-conteudo { margin-left: var(--uc-sidebar-larg); }
+}
+/* O fundo fica no filho: o Bootstrap força background transparent com
+   !important no .offcanvas-lg a partir do breakpoint lg. */
+.uc-sidebar__interno { background: var(--uc-superficie); min-height: 100%; }
+
+.uc-sidebar .accordion-button {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.7rem 1rem;
+  background: transparent;
+}
+.uc-sidebar .accordion-button:not(.collapsed) { box-shadow: none; color: var(--bs-emphasis-color); }
+.uc-sidebar .accordion-item { background: transparent; border-color: var(--bs-border-color); }
+.uc-sidebar .accordion-body { padding: 0.25rem 0 0.75rem; }
+.uc-sidebar-topo { padding: 0.9rem 1rem 0.6rem; border-bottom: 1px solid var(--bs-border-color); }
+
+.uc-aula-link {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  padding: 0.38rem 1rem 0.38rem 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+.uc-aula-link:hover { background: var(--uc-superficie-2); color: var(--bs-emphasis-color); }
+.uc-aula-link[aria-current="page"] {
+  border-left-color: var(--uc-cor-info);
+  background: var(--uc-superficie-2);
+  color: var(--bs-emphasis-color);
+  font-weight: 600;
+}
+.uc-aula-link .uc-num {
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.74rem;
+  color: var(--uc-term-fraco);
+  min-width: 1.7rem;
+}
+.uc-aula-link.uc-feita .uc-num { color: var(--uc-cor-sucesso); font-weight: 700; }
+
+/* Aula ainda não escrita: aparece no sumário, mas não vira link quebrado. */
+.uc-indisponivel { color: var(--uc-term-fraco); cursor: default; }
+.uc-indisponivel:hover { background: transparent; color: var(--uc-term-fraco); }
+.uc-em-breve {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.02rem 0.3rem;
+  border: 1px solid currentColor;
+  border-radius: 1rem;
+  opacity: 0.75;
+  vertical-align: middle;
+}
+
+/* Cabecalho de aula ------------------------------------------------------ */
+.uc-aula-cabecalho {
+  border-bottom: 1px solid var(--bs-border-color);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+.uc-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; font-size: 0.8rem; }
+.uc-meta .badge { font-weight: 600; }
+.uc-objetivos { border-left: 3px solid var(--uc-cor-info); padding: 0.25rem 0 0.25rem 1rem; }
+
+/* Cards da trilha -------------------------------------------------------- */
+.uc-card-modulo {
+  background: var(--uc-superficie);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  overflow: hidden;
+}
+.uc-modulo-num {
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--uc-cor-info);
+  letter-spacing: 0.08em;
+}
+.uc-lista-aulas { list-style: none; margin: 0; padding: 0; }
+.uc-lista-aulas > li { border-top: 1px solid var(--bs-border-color); }
+.uc-lista-aulas a {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  text-decoration: none;
+  color: var(--bs-body-color);
+}
+.uc-lista-aulas a:hover { background: var(--uc-superficie-2); color: var(--bs-emphasis-color); }
+.uc-lista-aulas .uc-num { font-family: var(--uc-fonte-mono); font-size: 0.8rem; color: var(--uc-term-fraco); }
+.uc-lista-aulas li.uc-feita .uc-num { color: var(--uc-cor-sucesso); font-weight: 700; }
+
+/* Busca ------------------------------------------------------------------ */
+.uc-busca { position: relative; }
+.uc-busca-resultados {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 1050;
+  width: min(30rem, 88vw);
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--uc-superficie);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  box-shadow: var(--uc-sombra);
+}
+.uc-busca-resultados a {
+  display: block;
+  padding: 0.55rem 0.85rem;
+  text-decoration: none;
+  color: var(--bs-body-color);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.uc-busca-resultados a:last-child { border-bottom: 0; }
+.uc-busca-resultados a:hover,
+.uc-busca-resultados a:focus { background: var(--uc-superficie-2); color: var(--bs-emphasis-color); }
+.uc-busca-resultados a.active { background: var(--uc-superficie-2); color: var(--bs-emphasis-color); }
+.uc-busca-ctx { display: block; font-size: 0.76rem; color: var(--uc-term-fraco); }
+.uc-busca-vazio { padding: 0.85rem; color: var(--uc-term-fraco); font-size: 0.9rem; }
+
+/* Prev/next e rodape ----------------------------------------------------- */
+.uc-prevnext { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3rem; }
+@media (max-width: 575.98px) { .uc-prevnext { grid-template-columns: 1fr; } }
+.uc-prevnext a {
+  display: block;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+  color: var(--bs-body-color);
+  height: 100%;
+}
+.uc-prevnext a:hover { border-color: var(--uc-cor-info); color: var(--bs-emphasis-color); }
+.uc-prevnext .uc-dir {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--uc-term-fraco);
+}
+.uc-prevnext .uc-prox { text-align: right; }
+.uc-vizinho-inerte {
+  padding: 0.85rem 1rem;
+  border: 1px dashed var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  color: var(--uc-term-fraco);
+}
+
+.uc-rodape {
+  margin-top: 4rem;
+  padding: 2rem 0;
+  font-size: 0.875rem;
+  border-top: 1px solid var(--bs-border-color);
+  background: var(--uc-superficie);
+  color: var(--uc-term-fraco);
+}
+.uc-rodape a { color: inherit; }
+
+/* Tabelas ---------------------------------------------------------------- */
+.uc-tabela-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  margin-bottom: 1.25rem;
+}
+.uc-tabela-wrap > table { margin-bottom: 0; }
+table.uc-dados { font-size: 0.88rem; }
+table.uc-dados th {
+  white-space: nowrap;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+table.uc-dados td code { white-space: nowrap; }
+
+/* Impressao -------------------------------------------------------------- */
+@media print {
+  .uc-navbar, .uc-sidebar, .uc-prevnext, .uc-progresso-global, .uc-rodape { display: none !important; }
+  .uc-conteudo { margin-left: 0; }
+}

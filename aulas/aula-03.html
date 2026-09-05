@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 03 · Instalação e configuração do SQL Server 2022 · UC10 Banco de dados</title>
+<meta name="description" content="Instalar o SQL Server 2022 Express, habilitar autenticação mista, liberar TCP/IP na porta 1433, conectar pelo sqlcmd e pelo SSMS 20 e validar tudo com SELECT @@VERSION.">
+<script>try{var t=JSON.parse(localStorage.getItem('uc10:tema'));if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/terminal.css">
+<link rel="stylesheet" href="../assets/css/didatico.css">
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</head>
+<body data-pagina="aula">
+
+<a class="uc-skip" href="#conteudo">Pular para o conteúdo</a>
+<header id="app-navbar"></header>
+<aside id="app-sidebar"></aside>
+
+<div class="uc-conteudo">
+  <main id="conteudo" class="container-xxl px-3 px-lg-4 py-4">
+
+    <div id="app-breadcrumb"></div>
+    <div id="app-cabecalho"></div>
+
+    <article>
+
+      <section id="objetivos">
+        <h2 class="visually-hidden">Objetivos de aprendizagem</h2>
+        <div class="uc-objetivos">
+          <p class="mb-1"><strong>Ao fim desta aula você será capaz de:</strong></p>
+          <ul class="mb-0">
+            <li>Instalar o SQL Server 2022 Express em uma instância nomeada e identificar o que cada componente faz.</li>
+            <li>Configurar o modo de autenticação misto e habilitar o login <code>sa</code> com senha forte.</li>
+            <li>Habilitar o protocolo TCP/IP e confirmar que a instância responde na porta 1433.</li>
+            <li>Conectar na instância por três caminhos diferentes: <code>sqlcmd</code>, SSMS 20 e Azure Data Studio.</li>
+            <li>Validar a instalação com <code>SELECT @@VERSION</code> e interpretar edição, build e sistema operacional.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="problematizacao">
+        <h2>Problematização</h2>
+        <p>
+          As duas aulas anteriores foram inteiras no quadro: você já sabe o que é um SGBD, por que a
+          planilha da Bella Massa não dá conta e como o modelo relacional organiza dado em relações.
+          Nada disso vira software enquanto não existir um servidor de banco de dados rodando na sua
+          máquina.
+        </p>
+        <p>
+          Esta é a primeira aula prática da unidade, e ela atende sozinha o <strong>indicador 2</strong>:
+          instalar e configurar o SGBD conforme a necessidade do projeto. Ao fim dela você terá o SQL
+          Server 2022 Express instalado, acessível pela rede e verificado por consulta — o chão sobre o
+          qual as outras 21 aulas se apoiam.
+        </p>
+      </section>
+
+      <section id="pecas">
+        <h2>As peças do ambiente</h2>
+        <p>
+          Cinco programas diferentes vão aparecer no seu menu iniciar, e é comum o aluno confundir
+          um com o outro. Só o primeiro é o banco de dados; os outros são ferramentas que conversam
+          com ele.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Componente</th>
+                <th scope="col">O que é</th>
+                <th scope="col">Você usa para</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>SQL Server 2022 Express</strong></td>
+                <td>O SGBD. Um serviço do Windows que fica rodando e guarda os dados.</td>
+                <td>Nada diretamente — ele não tem tela.</td>
+              </tr>
+              <tr>
+                <td><strong>SSMS 20</strong></td>
+                <td>SQL Server Management Studio: a IDE oficial, instalada à parte.</td>
+                <td>Escrever consultas, ver tabelas, gerar scripts, fazer backup.</td>
+              </tr>
+              <tr>
+                <td><strong>Azure Data Studio</strong></td>
+                <td>Editor multiplataforma, leve, com notebooks SQL.</td>
+                <td>Consulta rápida, uso em Linux/macOS, aula em notebook.</td>
+              </tr>
+              <tr>
+                <td><strong>sqlcmd</strong></td>
+                <td>Cliente de linha de comando que acompanha as ferramentas.</td>
+                <td>Rodar script <code>.sql</code> sem abrir interface — é o que este site emula.</td>
+              </tr>
+              <tr>
+                <td><strong>Configuration Manager</strong></td>
+                <td>Painel de configuração de serviços e protocolos de rede.</td>
+                <td>Ligar TCP/IP, mudar porta, reiniciar o serviço.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="uc-alerta uc-alerta--conceito">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-lightbulb"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Instância</span>
+            <p class="mb-0">
+              Uma <strong>instância</strong> é uma cópia independente do serviço do SQL Server na mesma
+              máquina, com seus próprios bancos, logins e porta. A instalação Express cria por padrão a
+              instância nomeada <code>SQLEXPRESS</code>, endereçada como
+              <code>NOME-DA-MAQUINA\SQLEXPRESS</code>. Uma instância <em>padrão</em> (sem nome) seria
+              endereçada só pelo nome da máquina. Guarde isso: metade dos erros de conexão do curso é
+              gente digitando o endereço da instância errada.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="instalacao">
+        <h2>Instalando o SQL Server 2022 Express</h2>
+        <p>
+          Baixe o instalador do SQL Server 2022 Express no site da Microsoft e execute como
+          administrador. Ele pergunta o tipo de instalação logo na primeira tela.
+        </p>
+
+        <ol class="uc-passos">
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Escolha o tipo <em>Custom</em></div>
+            <p class="mb-0">
+              <em>Basic</em> instala com tudo padrão e não pergunta a senha do <code>sa</code>, o que
+              obriga você a corrigir depois. <em>Download Media</em> só baixa os arquivos.
+              Escolha <strong>Custom</strong>: mais telas, menos retrabalho.
+            </p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Feature Selection: marque só o motor</div>
+            <p class="mb-0">
+              Marque <strong>Database Engine Services</strong>. Deixe de fora Machine Learning
+              Services, PolyBase e Full-Text Search — nada disso é usado nas 72 horas e cada um
+              acrescenta minutos de instalação e memória residente.
+            </p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Instance Configuration: mantenha <code>SQLEXPRESS</code></div>
+            <p class="mb-0">
+              O nome padrão da instância nomeada é <code>SQLEXPRESS</code>. Mantenha. Todos os
+              exemplos deste curso usam <code>localhost\SQLEXPRESS</code>; se você trocar, terá que
+              traduzir cada comando.
+            </p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Server Configuration: <em>Mixed Mode</em> e senha do <code>sa</code></div>
+            <p class="mb-0">
+              Marque <strong>Mixed Mode (SQL Server authentication and Windows authentication)</strong>
+              e defina a senha do <code>sa</code>. Use algo forte de verdade — a política do Windows
+              exige maiúscula, minúscula, dígito e símbolo. Nos exemplos do curso a senha é
+              <code>Bella@Massa2026</code>.
+            </p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Collation: <code>Latin1_General_CI_AS</code></div>
+            <p class="mb-0">
+              Na aba <em>Collation</em>, troque o padrão <code>SQL_Latin1_General_CP1_CI_AS</code> por
+              <code>Latin1_General_CI_AS</code>. <code>CI</code> = <em>case insensitive</em>,
+              <code>AS</code> = <em>accent sensitive</em>: "pizza" acha "Pizza", mas não confunde
+              "acai" com "açaí". A aula 13 volta nesse assunto com calma.
+            </p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Instale o SSMS 20 depois, separadamente</div>
+            <p class="mb-0">
+              O SSMS não vem no instalador do motor desde 2016. É outro download, outro instalador,
+              e ele pede reinício da máquina no fim.
+            </p>
+          </li>
+        </ol>
+
+        <p>
+          Terminada a instalação, o serviço já deve estar rodando. Confirme pelo PowerShell antes de
+          tentar qualquer conexão — se o serviço estiver parado, nenhuma ferramenta vai conectar e
+          você vai perder tempo procurando o erro no lugar errado.
+        </p>
+
+        <sql-terminal modo="shell" titulo="PowerShell — estado do serviço" lang="bash">
+          <script type="text/plain" slot="sql">Get-Service -Name "MSSQL$SQLEXPRESS"</script>
+          <script type="text/plain" slot="saida">Status   Name               DisplayName
+------   ----               -----------
+Running  MSSQL$SQLEXPRESS   SQL Server (SQLEXPRESS)</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--atencao">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Se aparecer Stopped</span>
+            <p class="mb-0">
+              Rode <code>Start-Service -Name "MSSQL$SQLEXPRESS"</code> em um PowerShell aberto como
+              administrador. Se ele parar sozinho de novo depois do boot, o serviço está em
+              <em>Manual</em>: mude para automático com
+              <code>Set-Service -Name "MSSQL$SQLEXPRESS" -StartupType Automatic</code>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="autenticacao">
+        <h2>Modo de autenticação e o login <code>sa</code></h2>
+        <p>
+          O SQL Server aceita dois modos de autenticação. No <strong>Windows Authentication</strong>,
+          quem entra é a sua conta do Windows e não existe senha separada. No <strong>Mixed
+          Mode</strong>, além disso existem logins próprios do SQL Server, com senha guardada no
+          banco <code>master</code> — é o que a aplicação Java da aula 23 vai usar, porque ela não
+          roda com a sua conta de usuário.
+        </p>
+        <p>
+          Se você esqueceu de marcar <em>Mixed Mode</em> na instalação, dá para corrigir. Conecte com
+          autenticação do Windows e verifique o modo atual:
+        </p>
+
+        <sql-terminal banco="master" titulo="qual é o modo de autenticação?">
+          <script type="text/plain" slot="sql">SELECT CASE SERVERPROPERTY('IsIntegratedSecurityOnly')
+            WHEN 1 THEN 'Somente Windows'
+            WHEN 0 THEN 'Misto (Windows + SQL Server)'
+       END AS modo_autenticacao;
+GO</script>
+          <script type="text/plain" slot="saida">modo_autenticacao
+----------------------------
+Somente Windows
+
+(1 row affected)</script>
+        </sql-terminal>
+
+        <p>
+          Para virar a chave é preciso mexer no registro do Windows (o Configuration Manager faz isso
+          pela interface, em <em>Properties &gt; Security</em>) e depois reiniciar o serviço. Com o
+          modo misto ativo, habilite o <code>sa</code>, que vem desabilitado por padrão:
+        </p>
+
+        <sql-terminal banco="master" titulo="habilitando o login sa">
+          <script type="text/plain" slot="sql">ALTER LOGIN sa ENABLE;
+ALTER LOGIN sa WITH PASSWORD = 'Bella@Massa2026';
+GO</script>
+          <script type="text/plain" slot="saida">Commands completed successfully.</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--perigo">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-shield-exclamation"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">O sa não é para o dia a dia</span>
+            <p class="mb-0">
+              O <code>sa</code> é <code>sysadmin</code>: pode apagar qualquer banco, ler qualquer
+              tabela e criar qualquer login. Nesta aula ele existe para você provar que a
+              autenticação SQL funciona. Na aula 24 você vai criar um login de aplicação com o
+              mínimo de privilégio e vai parar de usar o <code>sa</code> — inclusive porque
+              <code>sa</code> é o primeiro usuário que qualquer ataque automatizado tenta.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="rede">
+        <h2>TCP/IP, porta 1433 e SQL Server Browser</h2>
+        <p>
+          Na Express, o protocolo <strong>TCP/IP vem desabilitado</strong>. Enquanto você conecta da
+          própria máquina, o SQL Server usa memória compartilhada e nada disso importa. No momento em
+          que a aplicação Java, o Power BI ou o colega do lado tentarem conectar, a conexão falha.
+          Ligue o TCP/IP agora, para não descobrir o problema na aula 23.
+        </p>
+
+        <ol class="uc-passos">
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Abra o SQL Server Configuration Manager</div>
+            <p class="mb-0">
+              Ele não aparece na busca do menu iniciar em algumas versões. Rode
+              <code>SQLServerManager16.msc</code> na caixa Executar — o 16 é a versão interna do
+              SQL Server 2022.
+            </p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">SQL Server Network Configuration &gt; Protocols for SQLEXPRESS</div>
+            <p class="mb-0">Clique com o botão direito em <strong>TCP/IP</strong> e escolha <em>Enable</em>.</p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Fixe a porta 1433</div>
+            <p class="mb-0">
+              Em <em>Properties &gt; IP Addresses</em>, role até <strong>IPAll</strong>. Apague o
+              conteúdo de <em>TCP Dynamic Ports</em> e escreva <code>1433</code> em
+              <em>TCP Port</em>. Instância nomeada usa porta dinâmica por padrão, e porta que muda a
+              cada reinício é porta que quebra string de conexão.
+            </p>
+          </li>
+          <li class="uc-passo">
+            <div class="uc-passo-titulo">Reinicie o serviço</div>
+            <p class="mb-0">
+              Em <em>SQL Server Services</em>, botão direito em <em>SQL Server (SQLEXPRESS)</em> &gt;
+              <em>Restart</em>. Configuração de rede só vale depois do reinício.
+            </p>
+          </li>
+        </ol>
+
+        <p>
+          Conectado, você mesmo pode perguntar ao servidor por qual porta a sua sessão entrou. Este é
+          o teste que vale mais que qualquer print de tela:
+        </p>
+
+        <sql-terminal banco="master" titulo="por qual porta esta sessão entrou?">
+          <script type="text/plain" slot="sql">SELECT session_id,
+       net_transport,
+       local_tcp_port
+  FROM sys.dm_exec_connections
+ WHERE session_id = @@SPID;
+GO</script>
+          <script type="text/plain" slot="saida">session_id net_transport   local_tcp_port
+---------- --------------- --------------
+        54 Shared memory             NULL
+
+(1 row affected)</script>
+        </sql-terminal>
+
+        <p>
+          <code>Shared memory</code> e <code>local_tcp_port</code> nulo significam que você conectou
+          pelo atalho local, sem passar pela rede — esse resultado <em>não</em> prova que o TCP/IP
+          está funcionando. Force a conexão por TCP usando o endereço IP e a porta, e repita a
+          consulta:
+        </p>
+
+        <sql-terminal modo="shell" titulo="PowerShell — forçando conexão TCP" lang="bash">
+          <script type="text/plain" slot="sql">sqlcmd -S 127.0.0.1,1433 -U sa -P "Bella@Massa2026" -C -Q "SELECT net_transport, local_tcp_port FROM sys.dm_exec_connections WHERE session_id = @@SPID;"</script>
+          <script type="text/plain" slot="saida">net_transport   local_tcp_port
+--------------- --------------
+TCP                       1433
+
+(1 row affected)</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--info">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-info-circle"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Para que serve o SQL Server Browser</span>
+            <p class="mb-0">
+              Com porta dinâmica, o cliente que digita <code>MAQUINA\SQLEXPRESS</code> não sabe em
+              qual porta bater. Quem responde isso é o serviço <strong>SQL Server Browser</strong>,
+              na porta UDP 1434. Se você fixou a porta em 1433 e conecta sempre por
+              <code>host,1433</code>, o Browser deixa de ser necessário. Se conecta pelo nome da
+              instância, ele precisa estar rodando.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="sqlcmd">
+        <h2>Primeira conexão no <code>sqlcmd</code></h2>
+        <p>
+          O <code>sqlcmd</code> é o cliente que este site emula em todos os blocos escuros. Ele abre
+          uma sessão interativa em que cada linha ganha um prompt numerado, e o lote só é enviado ao
+          servidor quando você digita <code>GO</code>. Abra o PowerShell e conecte com autenticação
+          do Windows (<code>-E</code>):
+        </p>
+
+        <sql-terminal modo="shell" titulo="PowerShell — abrindo a sessão" lang="bash">
+          <script type="text/plain" slot="sql">sqlcmd -S localhost\SQLEXPRESS -E</script>
+          <script type="text/plain" slot="saida">1></script>
+        </sql-terminal>
+
+        <p>
+          O prompt <code>1&gt;</code> é o sinal de que você está dentro. Agora o comando que fecha
+          esta aula: descobrir exatamente qual servidor você instalou.
+        </p>
+
+        <sql-terminal banco="master" titulo="validando a instalação">
+          <script type="text/plain" slot="sql">SELECT @@VERSION;
+GO</script>
+          <script type="text/plain" slot="saida">
+-------------------------------------------------------------------------------
+Microsoft SQL Server 2022 (RTM-CU12) (KB5033663) - 16.0.4115.5 (X64)
+	Feb  1 2024 13:40:52
+	Copyright (C) 2022 Microsoft Corporation
+	Express Edition (64-bit) on Windows 10 Pro 10.0 <X64> (Build 22631: )
+
+(1 row affected)</script>
+        </sql-terminal>
+
+        <p>Quatro informações saem daí, e todas importam no curso:</p>
+        <ul>
+          <li><strong>SQL Server 2022</strong> — a versão do produto, que define quais comandos existem.</li>
+          <li><strong>16.0.4115.5</strong> — o build. O 16.0 é o SQL Server 2022; o resto é o nível de atualização.</li>
+          <li><strong>Express Edition</strong> — a edição, com limite de 10 GB por banco e 1 GB de RAM de buffer.</li>
+          <li><strong>(X64) on Windows</strong> — a arquitetura e o sistema operacional.</li>
+        </ul>
+
+        <p>
+          A mesma informação, em colunas separadas e mais fáceis de ler, vem das propriedades do
+          servidor. Repare que <code>SERVERPROPERTY</code> devolve tudo como <code>sql_variant</code>,
+          por isso o <code>CAST</code>:
+        </p>
+
+        <sql-terminal banco="master" titulo="propriedades do servidor">
+          <script type="text/plain" slot="sql">SELECT CAST(SERVERPROPERTY('ServerName')     AS VARCHAR(60)) AS servidor,
+       CAST(SERVERPROPERTY('Edition')         AS VARCHAR(40)) AS edicao,
+       CAST(SERVERPROPERTY('ProductVersion')  AS VARCHAR(20)) AS versao,
+       CAST(SERVERPROPERTY('Collation')       AS VARCHAR(40)) AS collation;
+GO</script>
+          <script type="text/plain" slot="saida">servidor                edicao                    versao      collation
+----------------------- ------------------------- ----------- --------------------
+LAPTOP-BM\SQLEXPRESS    Express Edition (64-bit)  16.0.4115.5 Latin1_General_CI_AS
+
+(1 row affected)</script>
+        </sql-terminal>
+
+        <p>
+          Guarde o valor de <code>collation</code>. Se ele saiu
+          <code>SQL_Latin1_General_CP1_CI_AS</code>, você aceitou o padrão do instalador; isso não
+          quebra nada agora, mas volta como assunto na aula 13, quando o banco
+          <code>BELLAMASSA</code> for criado.
+        </p>
+
+        <p>
+          Para sair da sessão, <code>QUIT</code> ou <kbd>Ctrl</kbd>+<kbd>C</kbd>. E para rodar um
+          arquivo inteiro sem entrar no modo interativo — que é como você vai executar os scripts
+          deste site — use <code>-i</code>:
+        </p>
+
+        <sql-terminal modo="shell" titulo="PowerShell — executando um arquivo .sql" lang="bash">
+          <script type="text/plain" slot="sql">sqlcmd -S localhost\SQLEXPRESS -E -i .\01-ambiente.sql -o .\saida-aula-01.txt</script>
+          <script type="text/plain" slot="saida">Changed database context to 'master'.</script>
+        </sql-terminal>
+      </section>
+
+      <section id="ssms">
+        <h2>SSMS 20 e Azure Data Studio</h2>
+        <p>
+          O SSMS 20 mudou um padrão que pega todo mundo de surpresa: na janela de conexão, o campo
+          <strong>Encryption</strong> agora vem como <em>Mandatory</em>. Como a sua instância local
+          usa um certificado autoassinado, a conexão é recusada antes mesmo de checar a senha.
+        </p>
+
+        <sql-terminal variant="erro" modo="ssms" titulo="SSMS 20 — conexão recusada" banco="master">
+          <script type="text/plain" slot="sql">-- Connect to Server: localhost\SQLEXPRESS
+-- Encryption: Mandatory
+-- Trust server certificate: [ ] desmarcado</script>
+          <script type="text/plain" slot="saida">A connection was successfully established with the server, but then an error
+occurred during the login process. (provider: SSL Provider, error: 0 - The
+certificate chain was issued by an authority that is not trusted.)</script>
+        </sql-terminal>
+
+        <p>
+          A correção em ambiente de estudo é marcar <strong>Trust server certificate</strong> na aba
+          <em>Connection Properties</em>, ou trocar <em>Encryption</em> para <em>Optional</em>. Em
+          produção a resposta é outra: instalar um certificado válido no servidor. No
+          <code>sqlcmd</code> versão 18 ou superior, o equivalente é a flag <code>-C</code>, que
+          aparece nos comandos desta aula.
+        </p>
+
+        <p>
+          Configurada a conexão, abra uma nova janela de consulta (<kbd>Ctrl</kbd>+<kbd>N</kbd>) e
+          rode o mesmo teste. No SSMS não existem os prompts numerados: a janela é um editor, e o
+          <code>GO</code> separa lotes:
+        </p>
+
+        <sql-terminal modo="ssms" banco="master" titulo="SSMS — nova consulta">
+          <script type="text/plain" slot="sql">SELECT @@SERVERNAME AS servidor,
+       DB_NAME()    AS banco_atual,
+       SYSTEM_USER  AS login_conectado,
+       GETDATE()    AS agora;
+GO</script>
+          <script type="text/plain" slot="saida">servidor              banco_atual login_conectado        agora
+--------------------- ----------- ---------------------- -----------------------
+LAPTOP-BM\SQLEXPRESS  master      LAPTOP-BM\aluno        2026-02-10 19:42:11.153
+
+(1 row affected)</script>
+        </sql-terminal>
+
+        <p>
+          O <strong>Azure Data Studio</strong> conecta na mesma instância, com o mesmo endereço, e é
+          a alternativa quando a máquina é Linux ou macOS, ou quando o SSMS pesa demais. Ele não tem
+          o gerador de diagramas nem o assistente de importação que a aula 22 usa — por isso o curso
+          adota o SSMS como ferramenta principal e o ADS como apoio.
+        </p>
+      </section>
+
+      <section id="docker">
+        <h2>Alternativa com Docker</h2>
+        <p>
+          Se a máquina do laboratório não permite instalar serviços, ou se você usa Linux ou macOS, o
+          caminho é subir o SQL Server em um contêiner. A imagem oficial roda a mesma engine, com as
+          mesmas versões de T-SQL — nada do curso muda.
+        </p>
+
+        <sql-terminal modo="shell" titulo="subindo o contêiner" lang="bash" prompt="$">
+          <script type="text/plain" slot="sql">docker run -d --name bellamassa \
+  -e "ACCEPT_EULA=Y" \
+  -e "MSSQL_SA_PASSWORD=Bella@Massa2026" \
+  -e "MSSQL_PID=Express" \
+  -p 1433:1433 \
+  mcr.microsoft.com/mssql/server:2022-latest</script>
+          <script type="text/plain" slot="saida">Unable to find image 'mcr.microsoft.com/mssql/server:2022-latest' locally
+2022-latest: Pulling from mssql/server
+Digest: sha256:8e9d0f2f4a5f4a2f2a1a9e2f1d4b6c8e0a3f5b7d9c1e3a5f7b9d1c3e5a7f9b1d
+Status: Downloaded newer image for mcr.microsoft.com/mssql/server:2022-latest
+9f3c1b7e42a8c1d5e0b6a4f28c9d3e7b105a2f8c4d6e9b3a7f1c5d8e2b4a6f90</script>
+        </sql-terminal>
+
+        <p>
+          O contêiner leva alguns segundos para subir o motor. Confirme que ele continua de pé — um
+          contêiner que aparece e some quase sempre é senha fraca recusada pela política:
+        </p>
+
+        <sql-terminal modo="shell" titulo="o contêiner está de pé?" lang="bash" prompt="$">
+          <script type="text/plain" slot="sql">docker ps --filter "name=bellamassa" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"</script>
+          <script type="text/plain" slot="saida">NAMES        STATUS          PORTS
+bellamassa   Up 24 seconds   0.0.0.0:1433->1433/tcp</script>
+        </sql-terminal>
+
+        <p>
+          O <code>sqlcmd</code> vive dentro da imagem, em
+          <code>/opt/mssql-tools18/bin/</code>. Como a versão 18 exige criptografia, a flag
+          <code>-C</code> (confiar no certificado) é obrigatória:
+        </p>
+
+        <sql-terminal modo="shell" titulo="conectando dentro do contêiner" lang="bash" prompt="$">
+          <script type="text/plain" slot="sql">docker exec -it bellamassa /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "Bella@Massa2026" -C \
+  -Q "SELECT CAST(SERVERPROPERTY('Edition') AS VARCHAR(40)) AS edicao;"</script>
+          <script type="text/plain" slot="saida">edicao
+----------------------------------------
+Express Edition (64-bit)
+
+(1 row affected)</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--atencao">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-hdd"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Contêiner sem volume perde tudo</span>
+            <p class="mb-0">
+              Do jeito acima, um <code>docker rm bellamassa</code> apaga o banco junto. Como o
+              projeto da pizzaria vai ser construído ao longo de 24 encontros, acrescente um volume:
+              <code>-v bellamassa-dados:/var/opt/mssql</code>. Assim os arquivos <code>.mdf</code> e
+              <code>.ldf</code> — os arquivos que a aula 02 apresentou — sobrevivem ao contêiner.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <mao-na-massa id="mao-na-massa" sub="Faça na sua instância. Só abra o gabarito depois de ver a saída no seu terminal.">
+        <exercicio-item nivel="aquecimento" titulo="Prove que o serviço está no ar">
+          <p>
+            Sem abrir o SSMS, descubra pelo PowerShell se o serviço da instância
+            <code>SQLEXPRESS</code> está rodando e em qual modo de inicialização ele está.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <sql-terminal modo="shell" titulo="PowerShell" lang="bash">
+              <script type="text/plain" slot="sql">Get-Service -Name "MSSQL$SQLEXPRESS" | Select-Object Status, Name, StartType</script>
+              <script type="text/plain" slot="saida">Status  Name              StartType
+------  ----              ---------
+Running MSSQL$SQLEXPRESS  Automatic</script>
+            </sql-terminal>
+            <p class="mb-0">
+              <code>StartType</code> igual a <code>Manual</code> ou <code>Disabled</code> explica o
+              clássico "ontem funcionava": a máquina reiniciou e o serviço não subiu junto.
+            </p>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="básico" titulo="Identifique a edição e o build">
+          <p>
+            Conecte pelo <code>sqlcmd</code> e responda em uma única consulta: qual é a edição,
+            qual é a versão do produto e qual é a collation do servidor.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <sql-terminal banco="master" titulo="gabarito do exercício 02">
+              <script type="text/plain" slot="sql">SELECT CAST(SERVERPROPERTY('Edition')        AS VARCHAR(40)) AS edicao,
+       CAST(SERVERPROPERTY('ProductVersion') AS VARCHAR(20)) AS versao,
+       CAST(SERVERPROPERTY('Collation')      AS VARCHAR(40)) AS collation;
+GO</script>
+              <script type="text/plain" slot="saida">edicao                    versao      collation
+------------------------- ----------- --------------------
+Express Edition (64-bit)  16.0.4115.5 Latin1_General_CI_AS
+
+(1 row affected)</script>
+            </sql-terminal>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="básico" titulo="Descubra o caminho dos arquivos do master">
+          <p>
+            Toda instância guarda seus bancos em arquivos no disco. Liste o nome lógico e o caminho
+            físico dos arquivos do banco <code>master</code>. Confronte o resultado com o que a
+            aula 02 descreveu sobre o nível físico do ANSI/SPARC.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <sql-terminal banco="master" titulo="gabarito do exercício 03">
+              <script type="text/plain" slot="sql">SELECT name AS nome_logico,
+       type_desc AS tipo,
+       physical_name AS caminho
+  FROM sys.master_files
+ WHERE database_id = DB_ID('master');
+GO</script>
+              <script type="text/plain" slot="saida">nome_logico tipo   caminho
+----------- ------ ------------------------------------------------------------
+master      ROWS   C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\...
+mastlog     LOG    C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\...
+
+(2 rows affected)</script>
+            </sql-terminal>
+            <p class="mb-0">
+              <code>ROWS</code> é o arquivo de dados (<code>.mdf</code>) e <code>LOG</code> é o log
+              de transações (<code>.ldf</code>).
+            </p>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="intermediário" titulo="Force uma conexão TCP e comprove">
+          <p>
+            Conecte usando <code>127.0.0.1,1433</code> com o login <code>sa</code> e mostre que a
+            sessão entrou por TCP, não por memória compartilhada. Se falhar, o TCP/IP não está
+            habilitado ou a porta não está fixa.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <sql-terminal modo="shell" titulo="gabarito do exercício 04" lang="bash">
+              <script type="text/plain" slot="sql">sqlcmd -S 127.0.0.1,1433 -U sa -P "Bella@Massa2026" -C -Q "SELECT net_transport, local_net_address, local_tcp_port FROM sys.dm_exec_connections WHERE session_id = @@SPID;"</script>
+              <script type="text/plain" slot="saida">net_transport   local_net_address local_tcp_port
+--------------- ----------------- --------------
+TCP             127.0.0.1                   1433
+
+(1 row affected)</script>
+            </sql-terminal>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="desafio" titulo="Crie e destrua um banco de teste">
+          <p>
+            Sem criar ainda o banco do curso, prove que você tem permissão para criar bancos: crie
+            <code>SANDBOX_UC10</code>, confirme que ele aparece na lista de bancos e apague em
+            seguida. Cuidado ao apagar — o comando não pergunta duas vezes.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <sql-terminal banco="master" titulo="gabarito do exercício 05">
+              <script type="text/plain" slot="sql">CREATE DATABASE SANDBOX_UC10;
+GO
+
+SELECT name, state_desc, recovery_model_desc
+  FROM sys.databases
+ WHERE name = 'SANDBOX_UC10';
+GO
+
+DROP DATABASE SANDBOX_UC10;
+GO</script>
+              <script type="text/plain" slot="saida">name          state_desc recovery_model_desc
+------------- ---------- -------------------
+SANDBOX_UC10  ONLINE     SIMPLE
+
+(1 row affected)</script>
+            </sql-terminal>
+            <p class="mb-0">
+              O <code>recovery_model_desc</code> saiu <code>SIMPLE</code> porque o banco
+              <code>model</code> da Express usa esse modelo. A aula 24 mostra por que isso decide
+              quais backups você consegue fazer.
+            </p>
+          </details>
+        </exercicio-item>
+      </mao-na-massa>
+
+      <section id="erros-comuns" class="uc-erros">
+        <h2>Erros comuns</h2>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Msg 18456</span>
+            <span class="uc-erro__titulo">Login failed for user 'sa'</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              Acontece em três situações: senha errada, login <code>sa</code> desabilitado ou
+              instância ainda em modo somente Windows. A mensagem é propositalmente vaga — o SQL
+              Server não conta ao atacante qual das três é.
+            </p>
+            <sql-terminal variant="erro" banco="master" titulo="sqlcmd — login recusado">
+              <script type="text/plain" slot="sql">-- sqlcmd -S localhost\SQLEXPRESS -U sa -P "senha-errada" -C</script>
+              <script type="text/plain" slot="saida">Msg 18456, Level 14, State 1, Server LAPTOP-BM\SQLEXPRESS, Line 1
+Login failed for user 'sa'.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> conecte com autenticação do Windows (<code>-E</code>), rode
+            <code>SELECT is_disabled FROM sys.server_principals WHERE name = 'sa';</code> e, se vier
+            <code>1</code>, execute <code>ALTER LOGIN sa ENABLE;</code> seguido de
+            <code>ALTER LOGIN sa WITH PASSWORD = '...';</code>. Confira também o modo de autenticação
+            com <code>SERVERPROPERTY('IsIntegratedSecurityOnly')</code>.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Erro 53</span>
+            <span class="uc-erro__titulo">Could not open a connection to SQL Server</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              O cliente nem chegou a falar com o motor. Ou o nome da instância está errado, ou o
+              serviço está parado, ou o TCP/IP está desabilitado, ou o firewall bloqueou a porta.
+            </p>
+            <sql-terminal variant="erro" modo="shell" titulo="sqlcmd — servidor não encontrado" lang="bash">
+              <script type="text/plain" slot="sql">sqlcmd -S localhost\SQLEXPRES -E</script>
+              <script type="text/plain" slot="saida">Sqlcmd: Error: Microsoft ODBC Driver 17 for SQL Server : Named Pipes Provider: Could not open a connection to SQL Server [53]. .
+Sqlcmd: Error: Microsoft ODBC Driver 17 for SQL Server : A network-related or instance-specific error has occurred while establishing a connection to SQL Server. Server is not found or not accessible. Check if instance name is correct and if SQL Server is configured to allow remote connections. For more information see SQL Server Books Online..
+Sqlcmd: Error: Microsoft ODBC Driver 17 for SQL Server : Login timeout expired.</script>
+            </sql-terminal>
+            <p class="mb-0">
+              No exemplo acima o erro é só uma letra: <code>SQLEXPRES</code> em vez de
+              <code>SQLEXPRESS</code>.
+            </p>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> confira o nome da instância no Configuration Manager, garanta
+            que o serviço está <em>Running</em>, habilite o TCP/IP e libere a porta 1433 no firewall
+            com <code>New-NetFirewallRule -DisplayName "SQL Server" -Direction Inbound -Protocol TCP
+            -LocalPort 1433 -Action Allow</code> em PowerShell administrativo.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">SSL Provider</span>
+            <span class="uc-erro__titulo">The certificate chain was issued by an authority that is not trusted</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              A pegadinha do SSMS 20 e do <code>sqlcmd</code> 18: os dois passaram a exigir conexão
+              criptografada por padrão, e o certificado autoassinado da instância local não é
+              confiável para o sistema.
+            </p>
+            <sql-terminal variant="erro" modo="shell" titulo="sqlcmd 18 — certificado não confiável" lang="bash">
+              <script type="text/plain" slot="sql">sqlcmd -S localhost\SQLEXPRESS -U sa -P "Bella@Massa2026"</script>
+              <script type="text/plain" slot="saida">Sqlcmd: Error: Microsoft ODBC Driver 18 for SQL Server : SSL Provider: The certificate chain was issued by an authority that is not trusted.
+Sqlcmd: Error: Microsoft ODBC Driver 18 for SQL Server : Client unable to establish connection.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> acrescente <code>-C</code> ao <code>sqlcmd</code> ou marque
+            <em>Trust server certificate</em> no SSMS. Entenda o que está aceitando: você está
+            dizendo "confio neste certificado sem verificar quem o emitiu", o que é aceitável em
+            máquina local de estudo e inaceitável em servidor de produção.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Shell</span>
+            <span class="uc-erro__titulo">The term 'sqlcmd' is not recognized</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              O motor foi instalado, mas as ferramentas de linha de comando não — ou não entraram no
+              <code>PATH</code>. O instalador do motor não traz o <code>sqlcmd</code> desde a versão
+              2019.
+            </p>
+            <sql-terminal variant="erro" modo="shell" titulo="PowerShell — comando não encontrado" lang="bash">
+              <script type="text/plain" slot="sql">sqlcmd -S localhost\SQLEXPRESS -E</script>
+              <script type="text/plain" slot="saida">sqlcmd : The term 'sqlcmd' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ sqlcmd -S localhost\SQLEXPRESS -E
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (sqlcmd:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> instale o pacote <em>Microsoft ODBC Driver</em> +
+            <em>SQL Server Command Line Utilities</em>, ou use o <code>sqlcmd</code> que vem com o
+            SSMS em <code>C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\</code>.
+            Feche e reabra o PowerShell depois de instalar: o <code>PATH</code> só é relido em um
+            terminal novo.
+          </div>
+        </article>
+      </section>
+
+      <checklist-aula id="checklist" chave="aula-03">
+        <script type="application/json">
+        [
+          "Instalar o SQL Server 2022 Express escolhendo instância, modo de autenticação e collation conscientemente",
+          "Verificar pelo PowerShell se o serviço da instância está rodando e em que modo de inicialização",
+          "Habilitar o login sa e trocar sua senha por T-SQL",
+          "Habilitar o TCP/IP e fixar a porta 1433 no Configuration Manager",
+          "Provar, por consulta, se a sessão atual entrou por memória compartilhada ou por TCP",
+          "Conectar pelo sqlcmd com autenticação do Windows e com login SQL, sabendo quando usar -C",
+          "Ler a saída de SELECT @@VERSION e dizer versão, build, edição e sistema operacional",
+          "Subir a mesma instância em Docker, com volume, quando não puder instalar na máquina"
+        ]
+        </script>
+      </checklist-aula>
+
+      <quiz-aula id="quiz" chave="aula-03">
+        <script type="application/json">
+        [
+          {
+            "pergunta": "Você instalou a Express com os padrões e agora precisa conectar do notebook do colega. A conexão falha, mas na sua máquina funciona. Qual é a causa mais provável?",
+            "alternativas": [
+              { "texto": "O protocolo TCP/IP está desabilitado na instância.", "certa": true, "feedback": "Correto. Na Express o TCP/IP vem desligado. Localmente a conexão usa memória compartilhada e funciona; de fora da máquina, não existe caminho." },
+              { "texto": "A edição Express não aceita mais de uma conexão simultânea.", "certa": false, "feedback": "Não existe esse limite. A Express limita 10 GB por banco, 1 GB de buffer pool e 4 núcleos, mas não o número de conexões." },
+              { "texto": "Falta reiniciar o Windows depois da instalação.", "certa": false, "feedback": "O motor sobe como serviço logo após a instalação. Reiniciar não liga o TCP/IP, que é uma configuração explícita no Configuration Manager." },
+              { "texto": "O banco master precisa ser colocado ONLINE manualmente.", "certa": false, "feedback": "O master é montado na inicialização do serviço. Se ele não estivesse online, o SQL Server sequer iniciaria." }
+            ]
+          },
+          {
+            "pergunta": "Qual comando responde, de dentro da sessão, se você entrou por TCP ou por memória compartilhada?",
+            "alternativas": [
+              { "texto": "SELECT net_transport FROM sys.dm_exec_connections WHERE session_id = @@SPID;", "certa": true, "feedback": "Correto. Essa DMV descreve a conexão atual: transporte, endereço local e porta. É a prova objetiva de que o TCP/IP está funcionando." },
+              { "texto": "SELECT @@VERSION;", "certa": false, "feedback": "Devolve versão, build, edição e sistema operacional — nada sobre o protocolo usado pela sua conexão." },
+              { "texto": "EXEC sp_helpdb;", "certa": false, "feedback": "Lista os bancos da instância com tamanho e proprietário. Não fala de rede." },
+              { "texto": "SELECT SERVERPROPERTY('Collation');", "certa": false, "feedback": "Devolve a collation do servidor, que é sobre ordenação e comparação de texto, não sobre conexão." }
+            ]
+          },
+          {
+            "pergunta": "No SSMS 20 a conexão local falha com \"The certificate chain was issued by an authority that is not trusted\". O que está acontecendo?",
+            "alternativas": [
+              { "texto": "O SSMS 20 passou a exigir criptografia por padrão e o certificado autoassinado da instância não é confiável.", "certa": true, "feedback": "Correto. A partir do SSMS 20 e do driver ODBC 18, Encrypt vem como Mandatory. Em máquina de estudo, marque Trust server certificate; em produção, instale um certificado válido." },
+              { "texto": "A senha do sa expirou.", "certa": false, "feedback": "Senha expirada produz a mensagem 18456 no processo de login, não um erro do provedor SSL. O erro de certificado acontece antes de a senha ser avaliada." },
+              { "texto": "O serviço SQL Server Browser está parado.", "certa": false, "feedback": "O Browser só resolve o nome da instância para uma porta. Se ele estivesse parado, o erro seria de servidor não encontrado, não de certificado." },
+              { "texto": "A collation do servidor é incompatível com a do SSMS.", "certa": false, "feedback": "Collation afeta comparação e ordenação de texto dentro do banco. Ela não participa do handshake de conexão." }
+            ]
+          },
+          {
+            "pergunta": "Qual é a diferença prática entre conectar em localhost e em localhost\\SQLEXPRESS?",
+            "alternativas": [
+              { "texto": "O primeiro endereça a instância padrão da máquina; o segundo, a instância nomeada SQLEXPRESS.", "certa": true, "feedback": "Correto. Uma máquina pode ter várias instâncias, cada uma com bancos e logins próprios. A instalação Express cria a nomeada SQLEXPRESS por padrão." },
+              { "texto": "O primeiro usa TCP/IP e o segundo usa memória compartilhada.", "certa": false, "feedback": "O protocolo é escolhido pelo cliente e pelo que está habilitado, não pela presença do nome da instância no endereço." },
+              { "texto": "O primeiro conecta como sa e o segundo como usuário do Windows.", "certa": false, "feedback": "Quem determina o login é a flag -E ou o par -U/-P, nunca o formato do endereço do servidor." },
+              { "texto": "São sinônimos; o SQL Server aceita os dois indistintamente.", "certa": false, "feedback": "Só seriam equivalentes se existisse uma instância padrão na máquina. Numa instalação Express típica, localhost sozinho falha com erro 53." }
+            ]
+          },
+          {
+            "pergunta": "Você subiu o SQL Server em Docker sem declarar volume e, depois de uma semana, rodou docker rm no contêiner. O que aconteceu com o banco da pizzaria?",
+            "alternativas": [
+              { "texto": "Foi perdido: sem volume, os arquivos .mdf e .ldf viviam apenas na camada gravável do contêiner.", "certa": true, "feedback": "Correto. É por isso que o contêiner de estudo precisa de -v bellamassa-dados:/var/opt/mssql. Sem volume, remover o contêiner apaga o banco." },
+              { "texto": "Continua salvo: a imagem mcr.microsoft.com/mssql/server guarda os dados.", "certa": false, "feedback": "Imagem é somente leitura e igual para todo mundo. Ela não guarda dados de nenhuma instalação específica." },
+              { "texto": "Continua salvo: o Docker faz backup automático antes de remover o contêiner.", "certa": false, "feedback": "O Docker não faz backup de nada. O comando rm remove a camada gravável sem aviso." },
+              { "texto": "Foi movido para C:\\Program Files\\Microsoft SQL Server no host.", "certa": false, "feedback": "Esse caminho pertence a uma instalação nativa no Windows. O contêiner Linux grava em /var/opt/mssql dentro dele mesmo." }
+            ]
+          }
+        ]
+        </script>
+      </quiz-aula>
+
+      <div id="app-script"></div>
+    </article>
+
+    <div id="app-prevnext"></div>
+  </main>
+
+  <div id="app-rodape"></div>
+</div>
+
+<script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>

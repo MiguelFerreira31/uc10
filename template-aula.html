@@ -1,0 +1,151 @@
+<!doctype html>
+<!--
+  ===========================================================================
+  template-aula.html — esqueleto de uma aula.
+
+  COMO CRIAR UMA AULA NOVA
+  1. Copie este arquivo para aulas/aula-NN.html.
+  2. Ajuste apenas o <title> e o <meta name="description">.
+  3. Escreva o miolo dentro de <article> respeitando a ordem obrigatória
+     (as 11 seções da anatomia estão marcadas por comentário abaixo).
+  4. Em assets/js/data/aulas.js, complete a entrada da aula e acrescente o
+     slug ao conjunto PUBLICADAS. Sidebar, breadcrumb, prev/next, cabeçalho,
+     bloco de download e busca passam a funcionar sozinhos.
+
+  NÃO ESCREVA NESTE ARQUIVO: navbar, sidebar, breadcrumb, cabeçalho da aula,
+  prev/next e rodapé. Todos são injetados por assets/js/layout.js a partir de
+  data/aulas.js — duplicar essas listas é o erro mais fácil de cometer aqui.
+
+  Caminhos são relativos (../assets/...), nunca absolutos: o site roda em
+  https://<usuario>.github.io/<repo>/ e também abrindo direto do disco.
+  ===========================================================================
+-->
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula NN · Título da aula · UC10 Banco de dados</title>
+<meta name="description" content="Uma frase descrevendo o que o aluno aprende nesta aula.">
+<script>try{var t=JSON.parse(localStorage.getItem('uc10:tema'));if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/terminal.css">
+<link rel="stylesheet" href="../assets/css/didatico.css">
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</head>
+<body data-pagina="aula">
+
+<a class="uc-skip" href="#conteudo">Pular para o conteúdo</a>
+<header id="app-navbar"></header>
+<aside id="app-sidebar"></aside>
+
+<div class="uc-conteudo">
+  <main id="conteudo" class="container-xxl px-3 px-lg-4 py-4">
+
+    <div id="app-breadcrumb"></div>
+    <!-- 1. Cabeçalho e 4. Pré-requisitos: injetados a partir de data/aulas.js -->
+    <div id="app-cabecalho"></div>
+
+    <article>
+
+      <!-- 2. Objetivos de aprendizagem: 3 a 5 bullets, verbo no infinitivo -->
+      <section id="objetivos">
+        <h2 class="visually-hidden">Objetivos de aprendizagem</h2>
+        <div class="uc-objetivos">
+          <p class="mb-1"><strong>Ao fim desta aula você será capaz de:</strong></p>
+          <ul class="mb-0">
+            <li>Verbo no infinitivo + objeto verificável.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 3. Problematização: o cenário da pizzaria que motiva a aula -->
+      <section id="problematizacao">
+        <h2>Problematização</h2>
+        <p>Um parágrafo curto, concreto, sem enrolação.</p>
+      </section>
+
+      <!-- 5. Conteúdo: seções curtas. Nunca mais de 2 parágrafos sem um bloco
+           executável (sql-terminal, result-set, er-diagram ou chen-diagram). -->
+      <section id="secao-exemplo">
+        <h2>Título da seção</h2>
+        <p>Explicação curta que desemboca no comando abaixo.</p>
+
+        <sql-terminal banco="BELLAMASSA" titulo="exemplo">
+          <script type="text/plain" slot="sql">SELECT 1 AS teste;
+GO</script>
+          <script type="text/plain" slot="saida">teste
+-----------
+          1
+
+(1 row affected)</script>
+        </sql-terminal>
+      </section>
+
+      <!-- 6. Mão na massa: 3 a 6 exercícios progressivos -->
+      <mao-na-massa id="mao-na-massa" sub="Execute na sua instância antes de abrir o gabarito.">
+        <exercicio-item nivel="aquecimento" titulo="Enunciado do exercício">
+          <p>O que o aluno deve fazer.</p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <p>Resposta comentada.</p>
+          </details>
+        </exercicio-item>
+      </mao-na-massa>
+
+      <!-- 7. Erros comuns: no mínimo 3, com a mensagem literal do SQL Server -->
+      <section id="erros-comuns" class="uc-erros">
+        <h2>Erros comuns</h2>
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Msg NNN</span>
+            <span class="uc-erro__titulo">O que o aluno fez de errado</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>Quando isso acontece.</p>
+          </div>
+          <div class="uc-erro__correcao"><strong>Correção:</strong> o que fazer.</div>
+        </article>
+      </section>
+
+      <!-- 8. Checklist persistido em localStorage -->
+      <checklist-aula id="checklist" chave="aula-NN">
+        <script type="application/json">
+        ["Primeiro item do checklist"]
+        </script>
+      </checklist-aula>
+
+      <!-- 9. Quiz: 5 questões, feedback por alternativa -->
+      <quiz-aula id="quiz" chave="aula-NN">
+        <script type="application/json">
+        [
+          {
+            "pergunta": "Enunciado da questão?",
+            "alternativas": [
+              { "texto": "Alternativa certa", "certa": true, "feedback": "Por que está certa." },
+              { "texto": "Alternativa errada", "certa": false, "feedback": "Por que está errada." }
+            ]
+          }
+        ]
+        </script>
+      </quiz-aula>
+
+      <!-- 10. Script baixável: injetado a partir do campo script em aulas.js -->
+      <div id="app-script"></div>
+    </article>
+
+    <!-- 11. Navegação anterior/próxima e link do glossário -->
+    <div id="app-prevnext"></div>
+  </main>
+
+  <div id="app-rodape"></div>
+</div>
+
+<script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>

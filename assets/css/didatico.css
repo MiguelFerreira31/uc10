@@ -1,0 +1,395 @@
+/* ==========================================================================
+   didatico.css — blocos de conteudo: passo, alerta, erro comum, mao na massa,
+   checklist, quiz, diagramas (Mermaid e Chen), comparativos e glossario.
+   ========================================================================== */
+
+/* Passo a passo numerado ------------------------------------------------- */
+.uc-passos { counter-reset: uc-passo; list-style: none; margin: 1.5rem 0; padding: 0; }
+.uc-passo {
+  counter-increment: uc-passo;
+  position: relative;
+  padding: 0 0 1.4rem 3rem;
+  border-left: 2px solid var(--bs-border-color);
+  margin-left: 1rem;
+}
+.uc-passo:last-child { border-left-color: transparent; padding-bottom: 0.25rem; }
+.uc-passo::before {
+  content: counter(uc-passo);
+  position: absolute;
+  left: -1.05rem;
+  top: -0.15rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--uc-cor-info);
+  color: #fff;
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.uc-passo > h4, .uc-passo > .uc-passo-titulo {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--bs-emphasis-color);
+}
+.uc-passo > *:last-child { margin-bottom: 0; }
+
+/* Alertas didaticos ------------------------------------------------------ */
+.uc-alerta {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--bs-border-color);
+  border-left: 4px solid var(--uc-cor-info);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+}
+.uc-alerta__icone { font-size: 1.15rem; line-height: 1.35; color: var(--uc-cor-info); }
+.uc-alerta__corpo > *:first-child { margin-top: 0; }
+.uc-alerta__corpo > *:last-child { margin-bottom: 0; }
+.uc-alerta__titulo {
+  display: block;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--uc-cor-info);
+  margin-bottom: 0.2rem;
+}
+.uc-alerta--atencao { border-left-color: var(--uc-cor-atencao); }
+.uc-alerta--atencao .uc-alerta__icone, .uc-alerta--atencao .uc-alerta__titulo { color: var(--uc-cor-atencao); }
+.uc-alerta--perigo { border-left-color: var(--uc-cor-perigo); }
+.uc-alerta--perigo .uc-alerta__icone, .uc-alerta--perigo .uc-alerta__titulo { color: var(--uc-cor-perigo); }
+.uc-alerta--sucesso { border-left-color: var(--uc-cor-sucesso); }
+.uc-alerta--sucesso .uc-alerta__icone, .uc-alerta--sucesso .uc-alerta__titulo { color: var(--uc-cor-sucesso); }
+.uc-alerta--conceito { border-left-color: var(--uc-cor-conceito); }
+.uc-alerta--conceito .uc-alerta__icone, .uc-alerta--conceito .uc-alerta__titulo { color: var(--uc-cor-conceito); }
+
+/* Erro comum ------------------------------------------------------------- */
+.uc-erros { margin: 2rem 0; }
+.uc-erro {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.uc-erro__cabecalho {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.65rem 1rem;
+  background: var(--uc-superficie-2);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.uc-erro__tag {
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--uc-cor-perigo);
+  border: 1px solid currentColor;
+  border-radius: var(--uc-raio-sm);
+  padding: 0.05rem 0.35rem;
+  flex: 0 0 auto;
+}
+.uc-erro__titulo { font-weight: 650; color: var(--bs-emphasis-color); }
+.uc-erro__corpo { padding: 0.9rem 1rem 0.25rem; }
+.uc-erro__corpo > *:last-child { margin-bottom: 0.75rem; }
+.uc-erro__correcao {
+  border-top: 1px solid var(--bs-border-color);
+  padding: 0.75rem 1rem;
+  background: rgba(46, 163, 106, 0.07);
+}
+.uc-erro__correcao > strong { color: var(--uc-cor-sucesso); }
+
+/* Mao na massa ----------------------------------------------------------- */
+.uc-mnm {
+  margin: 2.5rem 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+  overflow: hidden;
+}
+.uc-mnm__cabecalho {
+  padding: 0.85rem 1.1rem;
+  background: linear-gradient(90deg, rgba(61, 139, 253, 0.14), transparent);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.uc-mnm__cabecalho h2, .uc-mnm__cabecalho h3 { margin: 0; font-size: 1.1rem; }
+.uc-mnm__sub { font-size: 0.82rem; color: var(--uc-term-fraco); }
+.uc-ex { padding: 1.1rem; border-bottom: 1px solid var(--bs-border-color); }
+.uc-ex:last-child { border-bottom: 0; }
+.uc-ex__num {
+  display: inline-block;
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--uc-cor-info);
+  margin-bottom: 0.3rem;
+}
+.uc-ex__nivel {
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 1rem;
+  border: 1px solid var(--bs-border-color);
+  color: var(--uc-term-fraco);
+  margin-left: 0.5rem;
+}
+.uc-ex__enunciado { font-weight: 500; }
+.uc-ex__enunciado > *:last-child { margin-bottom: 0.5rem; }
+
+details.uc-gabarito {
+  border: 1px dashed var(--bs-border-color);
+  border-radius: var(--uc-raio-sm);
+  padding: 0.25rem 0.85rem;
+  margin-top: 0.75rem;
+  background: var(--uc-superficie-2);
+}
+details.uc-gabarito > summary {
+  cursor: pointer;
+  padding: 0.45rem 0;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--uc-cor-sucesso);
+  list-style: none;
+}
+details.uc-gabarito > summary::-webkit-details-marker { display: none; }
+details.uc-gabarito > summary::before { content: "\25B8  "; font-family: var(--uc-fonte-mono); }
+details.uc-gabarito[open] > summary::before { content: "\25BE  "; }
+details.uc-gabarito[open] > summary { border-bottom: 1px solid var(--bs-border-color); margin-bottom: 0.5rem; }
+details.uc-gabarito > *:last-child { margin-bottom: 0.75rem; }
+
+/* Checklist -------------------------------------------------------------- */
+.uc-checklist {
+  margin: 2.5rem 0;
+  border: 1px solid var(--bs-border-color);
+  border-left: 4px solid var(--uc-cor-sucesso);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+  padding: 1rem 1.1rem;
+}
+.uc-checklist__titulo { margin: 0 0 0.15rem; font-size: 1.05rem; }
+.uc-checklist__sub { font-size: 0.83rem; color: var(--uc-term-fraco); margin-bottom: 0.75rem; }
+.uc-checklist ul { list-style: none; margin: 0; padding: 0; }
+.uc-checklist li { border-top: 1px solid var(--bs-border-color); }
+.uc-checklist li:first-child { border-top: 0; }
+.uc-checklist label {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.5rem 0.15rem;
+  cursor: pointer;
+  max-width: var(--uc-medida);
+}
+.uc-checklist input[type="checkbox"] { margin-top: 0.32rem; flex: 0 0 auto; width: 1rem; height: 1rem; }
+.uc-checklist input:checked + span { color: var(--uc-term-fraco); text-decoration: line-through; }
+.uc-checklist__status {
+  margin-top: 0.75rem;
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.76rem;
+  color: var(--uc-term-fraco);
+}
+
+/* Quiz ------------------------------------------------------------------- */
+.uc-quiz {
+  margin: 2.5rem 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+  overflow: hidden;
+}
+.uc-quiz__cabecalho {
+  padding: 0.85rem 1.1rem;
+  background: linear-gradient(90deg, rgba(163, 113, 247, 0.16), transparent);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.uc-quiz__cabecalho h2, .uc-quiz__cabecalho h3 { margin: 0; font-size: 1.1rem; }
+.uc-questao { padding: 1.1rem; border-bottom: 1px solid var(--bs-border-color); }
+.uc-questao:last-of-type { border-bottom: 0; }
+.uc-questao__enunciado { font-weight: 600; margin-bottom: 0.7rem; }
+.uc-questao__enunciado .uc-qnum { font-family: var(--uc-fonte-mono); color: var(--uc-cor-conceito); margin-right: 0.4rem; }
+.uc-alt { display: block; margin-bottom: 0.4rem; }
+.uc-alt > button {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: var(--uc-medida);
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio-sm);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font: inherit;
+  cursor: pointer;
+}
+.uc-alt > button:hover:not([disabled]) { border-color: var(--uc-cor-conceito); }
+.uc-alt__letra {
+  font-family: var(--uc-fonte-mono);
+  font-weight: 700;
+  color: var(--uc-term-fraco);
+  flex: 0 0 auto;
+}
+.uc-alt > button[disabled] { cursor: default; opacity: 1; }
+.uc-alt[data-estado="neutro"] > button { opacity: 0.75; }
+.uc-alt[data-estado="certa"] > button { border-color: var(--uc-cor-sucesso); background: rgba(46, 163, 106, 0.12); }
+.uc-alt[data-estado="certa"] .uc-alt__letra { color: var(--uc-cor-sucesso); }
+.uc-alt[data-estado="errada"] > button { border-color: var(--uc-cor-perigo); background: rgba(229, 83, 75, 0.1); }
+.uc-alt[data-estado="errada"] .uc-alt__letra { color: var(--uc-cor-perigo); }
+.uc-alt__feedback {
+  display: none;
+  max-width: var(--uc-medida);
+  margin: 0.35rem 0 0.6rem 1.9rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--bs-border-color);
+  font-size: 0.87rem;
+  color: var(--bs-body-color);
+}
+.uc-alt[data-estado] .uc-alt__feedback { display: block; }
+.uc-alt[data-estado="certa"] .uc-alt__feedback { border-left-color: var(--uc-cor-sucesso); }
+.uc-alt[data-estado="errada"] .uc-alt__feedback { border-left-color: var(--uc-cor-perigo); }
+.uc-quiz__placar {
+  padding: 0.85rem 1.1rem;
+  border-top: 1px solid var(--bs-border-color);
+  background: var(--uc-superficie-2);
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.85rem;
+}
+
+/* Diagramas -------------------------------------------------------------- */
+.uc-diagrama {
+  margin: 1.75rem 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+  overflow: hidden;
+}
+.uc-diagrama__palco {
+  padding: 1rem;
+  overflow-x: auto;
+  text-align: center;
+  background: var(--uc-superficie);
+}
+.uc-diagrama__palco svg { max-width: 100%; height: auto; }
+.uc-diagrama__legenda {
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--bs-border-color);
+  background: var(--uc-superficie-2);
+  font-size: 0.83rem;
+  color: var(--bs-body-color);
+}
+.uc-diagrama__legenda b { color: var(--bs-emphasis-color); }
+.uc-diagrama__descricao { margin: 0.5rem 0 0; }
+.uc-diagrama__descricao > summary { cursor: pointer; font-size: 0.8rem; color: var(--uc-term-fraco); }
+.uc-diagrama__erro {
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--uc-cor-atencao);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.uc-diagrama__fonte {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  background: var(--uc-term-bg);
+  color: var(--uc-term-texto);
+}
+
+/* Notacao de Chen (SVG autoral) ------------------------------------------ */
+.uc-chen { font-family: var(--uc-fonte-texto); }
+.uc-chen .chen-entidade { fill: #16233c; stroke: #4b7bec; stroke-width: 2; }
+.uc-chen .chen-entidade-fraca { fill: #16233c; stroke: #4b7bec; stroke-width: 2; }
+.uc-chen .chen-rel { fill: #2a1f3d; stroke: #a371f7; stroke-width: 2; }
+.uc-chen .chen-attr { fill: #10261d; stroke: #2ea36a; stroke-width: 1.6; }
+.uc-chen .chen-attr-deriv { fill: #10261d; stroke: #2ea36a; stroke-width: 1.6; stroke-dasharray: 5 4; }
+.uc-chen .chen-linha { stroke: #6b7689; stroke-width: 1.6; fill: none; }
+.uc-chen .chen-linha-total { stroke: #6b7689; stroke-width: 3.2; fill: none; }
+.uc-chen text { fill: #d3d9e4; font-size: 13px; text-anchor: middle; dominant-baseline: middle; }
+.uc-chen .chen-rotulo-ent { fill: #cfe0ff; font-weight: 700; font-size: 14px; }
+.uc-chen .chen-rotulo-rel { fill: #dcc8ff; font-weight: 650; }
+.uc-chen .chen-rotulo-attr { fill: #b9e8cf; font-size: 12px; }
+.uc-chen .chen-card { fill: #ffd479; font-family: var(--uc-fonte-mono); font-size: 12px; font-weight: 700; }
+.uc-chen .chen-attr-chave { text-decoration: underline; }
+[data-bs-theme="light"] .uc-chen .chen-entidade { fill: #e7effd; }
+[data-bs-theme="light"] .uc-chen .chen-rel { fill: #f2ebfd; }
+[data-bs-theme="light"] .uc-chen .chen-attr { fill: #e6f6ec; }
+[data-bs-theme="light"] .uc-chen text { fill: #1f2430; }
+[data-bs-theme="light"] .uc-chen .chen-rotulo-ent { fill: #0b3d91; }
+[data-bs-theme="light"] .uc-chen .chen-rotulo-rel { fill: #5a2ca0; }
+[data-bs-theme="light"] .uc-chen .chen-rotulo-attr { fill: #14663f; }
+[data-bs-theme="light"] .uc-chen .chen-card { fill: #8a5d00; }
+
+/* Comparativo lado a lado ------------------------------------------------ */
+.uc-lado-a-lado {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  margin: 1.5rem 0;
+}
+.uc-lado-a-lado > figure, .uc-lado-a-lado > div {
+  margin: 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+  padding: 0.9rem;
+}
+.uc-lado-a-lado h4 { margin-top: 0; font-size: 0.92rem; }
+.uc-lado-a-lado .uc-term, .uc-lado-a-lado .uc-diagrama { margin: 0.5rem 0 0; }
+
+.uc-errado { border-color: rgba(229, 83, 75, 0.55) !important; }
+.uc-errado .uc-tag-modelo { color: var(--uc-cor-perigo); }
+.uc-certo { border-color: rgba(46, 163, 106, 0.55) !important; }
+.uc-certo .uc-tag-modelo { color: var(--uc-cor-sucesso); }
+.uc-tag-modelo {
+  font-family: var(--uc-fonte-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Leitura de cardinalidade ----------------------------------------------- */
+.uc-leitura {
+  margin: 1.25rem 0;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid var(--uc-cor-conceito);
+  border-radius: var(--uc-raio-sm);
+  background: var(--uc-superficie);
+  font-size: 0.95rem;
+}
+.uc-leitura p { margin-bottom: 0.35rem; }
+.uc-leitura p:last-child { margin-bottom: 0; }
+.uc-leitura b { color: var(--uc-cor-conceito); }
+
+/* Download de script ----------------------------------------------------- */
+.uc-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 2.5rem 0 0;
+  padding: 0.9rem 1.1rem;
+  border: 1px dashed var(--bs-border-color);
+  border-radius: var(--uc-raio);
+  background: var(--uc-superficie);
+}
+.uc-download__nome { font-family: var(--uc-fonte-mono); font-size: 0.85rem; color: var(--bs-emphasis-color); }
+.uc-download__desc { font-size: 0.85rem; color: var(--uc-term-fraco); flex: 1 1 14rem; }
+
+/* Termo do glossario ----------------------------------------------------- */
+.uc-termo {
+  border-bottom: 1px dotted var(--uc-cor-conceito);
+  cursor: help;
+}

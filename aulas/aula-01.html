@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 01 · Apresentação da UC10 e fundamentos de banco de dados · UC10</title>
+<meta name="description" content="O que a UC10 entrega, os cinco indicadores do plano de ensino, o projeto integrador da Pizzaria Bella Massa e os conceitos de dado, informação e SGBD.">
+<script>try{var t=JSON.parse(localStorage.getItem('uc10:tema'));if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/terminal.css">
+<link rel="stylesheet" href="../assets/css/didatico.css">
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</head>
+<body data-pagina="aula">
+
+<a class="uc-skip" href="#conteudo">Pular para o conteúdo</a>
+<header id="app-navbar"></header>
+<aside id="app-sidebar"></aside>
+
+<div class="uc-conteudo">
+  <main id="conteudo" class="container-xxl px-3 px-lg-4 py-4">
+
+    <div id="app-breadcrumb"></div>
+    <div id="app-cabecalho"></div>
+
+    <article>
+
+      <section id="objetivos">
+        <h2 class="visually-hidden">Objetivos de aprendizagem</h2>
+        <div class="uc-objetivos">
+          <p class="mb-1"><strong>Ao fim desta aula você será capaz de:</strong></p>
+          <ul class="mb-0">
+            <li>Explicar o que a UC10 entrega e quais são os cinco indicadores que serão avaliados.</li>
+            <li>Distinguir dado, informação e conhecimento em exemplos do próprio estudo de caso.</li>
+            <li>Justificar por que um SGBD substitui a planilha, citando pelo menos quatro funções que ele oferece e ela não.</li>
+            <li>Diferenciar banco de dados, SGBD e linguagem SQL sem trocar os três nomes.</li>
+            <li>Localizar, no mapa dos 24 encontros, em qual aula cada entregável do projeto final é construído.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="problematizacao">
+        <h2>Problematização</h2>
+        <p>
+          A Pizzaria Bella Massa fechou 2025 com 38 pedidos por noite anotados em bloco de papel e
+          uma planilha que a gestora chama de "o arquivo". Duas vezes por semana alguém liga
+          perguntando o endereço de um cliente antigo e a resposta demora cinco minutos. O contador
+          pediu o total vendido por sabor no último trimestre e ninguém conseguiu responder.
+        </p>
+        <p>
+          Você foi chamado para resolver isso. E a primeira decisão profissional que você vai tomar
+          não é qual banco instalar: é entender <em>o que</em> precisa ser guardado, <em>como</em> os
+          dados se relacionam e <em>por que</em> uma planilha não aguenta esse problema. É disso que
+          trata este primeiro encontro — inteiro no quadro, sem computador ligado.
+        </p>
+      </section>
+
+      <section id="o-que-e-a-uc">
+        <h2>O que é a UC10</h2>
+        <p>
+          <strong>UC</strong> é unidade curricular: um bloco de competência com começo, meio e
+          avaliação próprios dentro da Habilitação Profissional Técnica em Informática. A UC10 se
+          chama <em>Desenvolver banco de dados</em> e tem <strong>72 horas</strong>, distribuídas em
+          <strong>24 encontros de 3 horas</strong>.
+        </p>
+        <p>
+          A competência que ela desenvolve, em uma frase: <em>projetar, implementar, consultar e
+          manter um banco de dados relacional a partir dos requisitos de um cliente</em>. Repare nos
+          quatro verbos — eles não são sinônimos e nenhum deles é "saber SQL de cor".
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Verbo</th>
+                <th scope="col">O que significa na prática</th>
+                <th scope="col">Onde no curso</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Projetar</strong></td>
+                <td>Ouvir o cliente, extrair entidades e relacionamentos, desenhar MER e DER, normalizar e documentar</td>
+                <td>Módulo 1</td>
+              </tr>
+              <tr>
+                <td><strong>Implementar</strong></td>
+                <td>Criar banco, tabelas, chaves e restrições em T-SQL; povoar com dados reais</td>
+                <td>Módulo 2</td>
+              </tr>
+              <tr>
+                <td><strong>Consultar</strong></td>
+                <td>Responder perguntas do negócio com <code>SELECT</code>, junções, agregações e subconsultas</td>
+                <td>Módulo 2</td>
+              </tr>
+              <tr>
+                <td><strong>Manter</strong></td>
+                <td>Automatizar com procedures e triggers, controlar acesso, fazer backup e restaurar</td>
+                <td>Módulo 3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="uc-alerta uc-alerta--conceito">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-signpost-2"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">A ordem não é acidental</span>
+            <p class="mb-0">
+              O módulo de modelagem vem antes do de SQL, e é o mais longo. O motivo é simples: modelo
+              errado não se conserta com SQL bom. Uma consulta ruim você reescreve em dez minutos; uma
+              tabela mal modelada já tem, quando o erro aparece, cinquenta mil linhas de dados
+              apoiadas nela.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="indicadores">
+        <h2>Os cinco indicadores, um a um</h2>
+        <p>
+          O plano de ensino da UC10 define <strong>cinco indicadores</strong>. Eles não são temas:
+          são comportamentos observáveis que você precisa demonstrar. Toda aula deste site declara,
+          no cabeçalho, quais indicadores ela atende — e a tabela abaixo é montada a partir dessa
+          mesma informação, então ela nunca fica desatualizada em relação à trilha.
+        </p>
+
+        <div id="app-indicadores"></div>
+
+        <p>
+          Leia a coluna do meio como um enunciado de prova prática. "Elabora diagramas de acordo com
+          os requisitos levantados" quer dizer que o seu DER será conferido contra a entrevista da
+          aula 04 — não contra um gabarito genérico de pizzaria. "Desenvolve scripts coerentes com o
+          modelo" quer dizer que o seu <code>CREATE TABLE</code> precisa ser a tradução fiel do seu
+          próprio diagrama.
+        </p>
+
+        <div class="uc-alerta uc-alerta--atencao">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-bullseye"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Onde os alunos perdem nota</span>
+            <p class="mb-0">
+              Quase nunca é no indicador 3 (scripts SQL). É no <strong>indicador 1</strong>, quando o
+              diagrama entregue não corresponde ao banco criado, e no <strong>indicador 5</strong>,
+              quando o projeto chega ao fim sem plano de backup nenhum. Os dois são fáceis de
+              garantir e fáceis de esquecer.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="projeto-integrador">
+        <h2>O projeto integrador: Pizzaria Bella Massa</h2>
+        <p>
+          O curso inteiro gira em torno de um caso só. Nada de <code>tabela1</code>,
+          <code>foo</code> ou <code>aluno/professor</code> genérico: cada aula acrescenta uma peça ao
+          mesmo banco, e no encontro 24 você entrega esse banco documentado. A Bella Massa é uma
+          pizzaria com <strong>delivery e salão</strong>, e as duas operações convivem no mesmo
+          modelo — é justamente essa convivência que gera as decisões interessantes.
+        </p>
+        <p>
+          Este é o destino. Você não precisa entender o diagrama agora; precisa saber que ele existe e
+          que será construído por você, tabela por tabela, a partir do encontro 04.
+        </p>
+
+        <er-diagram
+          legenda="Modelo final da Pizzaria Bella Massa — o que você terá construído no encontro 24."
+          descricao="Diagrama entidade-relacionamento com dezessete tabelas. CLIENTE liga-se a TELEFONE_CLIENTE, ENDERECO, BINA e PEDIDO. PEDIDO liga-se a ITEM_PEDIDO, ENTREGA, PAGAMENTO, MESA e FUNCIONARIO. ITEM_PEDIDO liga PEDIDO a PRODUTO. PRODUTO liga-se a CATEGORIA_PRODUTO, PRODUTO_INGREDIENTE e PRODUTO_TAMANHO_PRECO, que também se liga a TAMANHO. PRODUTO_INGREDIENTE liga PRODUTO a INGREDIENTE. PAGAMENTO liga-se a FORMA_PAGAMENTO. FUNCIONARIO relaciona-se consigo mesmo por supervisão.">
+          <script type="text/plain">
+erDiagram
+    CLIENTE          ||--o{ TELEFONE_CLIENTE : possui
+    CLIENTE          ||--o{ ENDERECO : mora_em
+    CLIENTE          ||--o{ BINA : origina
+    CLIENTE          ||--o{ PEDIDO : faz
+    FUNCIONARIO      ||--o{ FUNCIONARIO : supervisiona
+    FUNCIONARIO      ||--o{ PEDIDO : atende
+    MESA             ||--o{ PEDIDO : acomoda
+    PEDIDO           ||--|{ ITEM_PEDIDO : detalha
+    PEDIDO           ||--o| ENTREGA : gera
+    PEDIDO           ||--o{ PAGAMENTO : quita
+    FORMA_PAGAMENTO  ||--o{ PAGAMENTO : usa
+    PRODUTO          ||--o{ ITEM_PEDIDO : compoe
+    CATEGORIA_PRODUTO ||--o{ PRODUTO : classifica
+    PRODUTO          ||--o{ PRODUTO_TAMANHO_PRECO : precificado_em
+    TAMANHO          ||--o{ PRODUTO_TAMANHO_PRECO : define
+    PRODUTO          ||--o{ PRODUTO_INGREDIENTE : leva
+    INGREDIENTE      ||--o{ PRODUTO_INGREDIENTE : entra_em
+    ENDERECO         ||--o{ ENTREGA : destino_de
+          </script>
+        </er-diagram>
+
+        <p>
+          São dezessete tabelas. Duas delas costumam surpreender quem já viu exercícios de pizzaria em
+          outros cursos:
+        </p>
+        <ul>
+          <li>
+            <code>produto_tamanho_preco</code> — porque o preço não é da pizza, é da pizza
+            <em>naquele tamanho</em>. Broto e família custam diferente e são o mesmo produto.
+          </li>
+          <li>
+            <code>bina</code> — o identificador de chamadas. O plano de ensino cita explicitamente a
+            identificação de quem está ligando, e esse requisito gera uma decisão de modelagem fina:
+            a ligação é registrada <em>antes</em> de se saber se o número pertence a um cliente
+            cadastrado.
+          </li>
+        </ul>
+
+        <p>
+          Para dar o gosto do que vem: esta é uma das consultas que você escreverá no encontro 19,
+          respondendo à pergunta que hoje a pizzaria não consegue responder. Não tente entendê-la
+          linha a linha ainda — repare só que <em>uma</em> pergunta de negócio vira <em>uma</em>
+          consulta.
+        </p>
+
+        <sql-terminal banco="BELLAMASSA" titulo="prévia: o relatório que o contador pediu">
+          <script type="text/plain" slot="sql">SELECT c.nm_categoria,
+       p.nm_produto,
+       SUM(i.qt_item)                  AS qt_vendida,
+       SUM(i.qt_item * i.vl_unitario)  AS vl_faturado
+  FROM pedido            AS ped
+  JOIN item_pedido       AS i  ON i.id_pedido    = ped.id_pedido
+  JOIN produto           AS p  ON p.id_produto   = i.id_produto
+  JOIN categoria_produto AS c  ON c.id_categoria = p.id_categoria
+ WHERE ped.dt_pedido >= '2026-01-01'
+   AND ped.dt_pedido  < '2026-04-01'
+ GROUP BY c.nm_categoria, p.nm_produto
+ ORDER BY vl_faturado DESC;
+GO</script>
+          <script type="text/plain" slot="saida">nm_categoria    nm_produto           qt_vendida  vl_faturado
+--------------- -------------------- ----------- -------------
+Pizza salgada   Calabresa                    412      22629.80
+Pizza salgada   Mussarela                    377      19226.30
+Pizza salgada   Portuguesa                   198      11276.10
+Bebida          Refrigerante 2L              509       4072.00
+Pizza doce      Chocolate com morango         86       5074.00
+
+(5 rows affected)</script>
+        </sql-terminal>
+      </section>
+
+      <section id="dado-informacao">
+        <h2>Dado, informação e conhecimento</h2>
+        <p>
+          Três palavras que o dia a dia usa como sinônimos e que, aqui, significam coisas diferentes.
+          A distinção não é filosófica: ela decide o que vai para dentro do banco e o que é produzido
+          na hora da consulta.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Termo</th>
+                <th scope="col">Definição</th>
+                <th scope="col">Na Bella Massa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Dado</strong></td>
+                <td>Fato bruto, sem contexto. Isolado, não responde nada.</td>
+                <td><code>54.90</code> · <code>2026-03-14</code> · <code>Calabresa</code></td>
+              </tr>
+              <tr>
+                <td><strong>Informação</strong></td>
+                <td>Dado com contexto e relação, que responde a uma pergunta.</td>
+                <td>"Em 14/03/2026 vendemos 3 calabresas grandes, somando R$ 164,70."</td>
+              </tr>
+              <tr>
+                <td><strong>Conhecimento</strong></td>
+                <td>Informação acumulada que sustenta uma decisão.</td>
+                <td>"Calabresa responde por 38% do faturamento; nunca deixar faltar."</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          O banco de dados guarda <strong>dado</strong>. A informação é produzida no momento da
+          consulta, e o conhecimento é construído por quem lê o relatório. Guarde essa hierarquia:
+          ela explica por que <em>não</em> se guarda o total do pedido como se fosse um fato — ele é
+          derivado da soma dos itens, e a aula 05 vai chamá-lo de <em>atributo derivado</em>.
+        </p>
+
+        <p>
+          Repare a diferença na prática. À esquerda, dado bruto como ele vive na tabela; abaixo, a
+          informação que uma consulta extrai dele:
+        </p>
+
+        <result-set legenda="Dado bruto: as linhas de item_pedido, exatamente como ficam gravadas">
+          <script type="application/json">
+          {
+            "colunas": [
+              { "nome": "id_pedido", "tipo": "num" },
+              { "nome": "id_produto", "tipo": "num" },
+              { "nome": "qt_item", "tipo": "num" },
+              { "nome": "vl_unitario", "tipo": "num" }
+            ],
+            "linhas": [[1401, 3, 1, "54.90"], [1401, 12, 2, "8.00"], [1402, 3, 2, "54.90"], [1403, 7, 1, "48.00"]],
+            "afetadas": 4
+          }
+          </script>
+        </result-set>
+
+        <result-set legenda="Informação: o que a consulta produz a partir dos mesmos dados">
+          <script type="application/json">
+          {
+            "colunas": [
+              { "nome": "nm_produto", "tipo": "texto", "largura": 20 },
+              { "nome": "qt_vendida", "tipo": "num" },
+              { "nome": "vl_faturado", "tipo": "num" }
+            ],
+            "linhas": [["Calabresa", 3, "164.70"], ["Portuguesa", 1, "48.00"], ["Refrigerante 2L", 2, "16.00"]],
+            "afetadas": 3
+          }
+          </script>
+        </result-set>
+      </section>
+
+      <section id="arquivos-vs-bd">
+        <h2>Por que não resolver com planilha</h2>
+        <p>
+          A pergunta é legítima e merece resposta técnica, não desdém. A planilha da Bella Massa
+          funcionou por três anos. O que ela não faz aparece quando o negócio cresce, e são quatro
+          problemas com nome próprio:
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Problema</th>
+                <th scope="col">Como aparece na planilha</th>
+                <th scope="col">Como o banco resolve</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Redundância</strong></td>
+                <td>O nome e o telefone do cliente repetidos em cada uma das 400 linhas de pedido dele</td>
+                <td>O cliente é gravado uma vez; o pedido só guarda a referência a ele</td>
+              </tr>
+              <tr>
+                <td><strong>Inconsistência</strong></td>
+                <td>"Helena Duarte", "Helena duarte" e "H. Duarte" convivendo como se fossem três pessoas</td>
+                <td>Um cadastro único, protegido por chave primária e restrição de unicidade</td>
+              </tr>
+              <tr>
+                <td><strong>Anomalia de exclusão</strong></td>
+                <td>Apagar o último pedido de um cliente apaga também o endereço dele, que só existia ali</td>
+                <td>Cliente e pedido são tabelas separadas; excluir um não destrói o outro</td>
+              </tr>
+              <tr>
+                <td><strong>Concorrência</strong></td>
+                <td>Dois atendentes com o arquivo aberto ao mesmo tempo; o último a salvar apaga o trabalho do outro</td>
+                <td>Transações e bloqueios: o SGBD serializa as escritas e nenhuma se perde</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Os três primeiros voltam com nome técnico e tratamento formal no encontro 10, sobre
+          normalização. O quarto é assunto do encontro 24. Mas o exemplo mais direto de tudo isso é o
+          que a planilha simplesmente não sabe fazer: <strong>recusar</strong> um dado inválido.
+          Nenhuma célula do Excel devolve isto:
+        </p>
+
+        <sql-terminal variant="erro" banco="BELLAMASSA" titulo="prévia: o banco recusando um cliente duplicado">
+          <script type="text/plain" slot="sql">INSERT INTO cliente (id_cliente, nm_cliente)
+VALUES (1, 'Helena Duarte');
+GO</script>
+          <script type="text/plain" slot="saida">Msg 2627, Level 14, State 1, Line 1
+Violation of PRIMARY KEY constraint 'PK_cliente'. Cannot insert duplicate key in object 'dbo.cliente'. The duplicate key value is (1).
+The statement has been terminated.</script>
+        </sql-terminal>
+
+        <p>
+          Essa mensagem é o banco defendendo a integridade dos dados sem depender da disciplina de
+          quem digita. Você vai ver esse número — <code>Msg 2627</code> — várias vezes ao longo do
+          curso, e ele quase sempre é uma boa notícia: significa que a regra que você escreveu está
+          funcionando.
+        </p>
+      </section>
+
+      <section id="funcoes-sgbd">
+        <h2>O que um SGBD faz por você</h2>
+        <p>
+          <strong>SGBD</strong> é Sistema Gerenciador de Banco de Dados: o software que administra o
+          banco. SQL Server, MySQL, PostgreSQL e Oracle são SGBDs. Ele não é o banco — é quem cuida
+          dele. Estas são as seis responsabilidades que você deixa de programar por conta própria ao
+          usar um:
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Função</th>
+                <th scope="col">O que o SGBD garante</th>
+                <th scope="col">Encontro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Persistência</strong></td>
+                <td>Os dados sobrevivem ao desligamento da máquina, gravados em arquivo próprio</td>
+                <td>02 e 13</td>
+              </tr>
+              <tr>
+                <td><strong>Integridade</strong></td>
+                <td>Regras declaradas uma vez são cobradas em toda escrita, venha ela de onde vier</td>
+                <td>10 e 14</td>
+              </tr>
+              <tr>
+                <td><strong>Concorrência</strong></td>
+                <td>Vários usuários escrevendo ao mesmo tempo sem sobrescrever uns aos outros</td>
+                <td>15 e 24</td>
+              </tr>
+              <tr>
+                <td><strong>Segurança</strong></td>
+                <td>Cada login enxerga e altera apenas o que lhe foi concedido</td>
+                <td>24</td>
+              </tr>
+              <tr>
+                <td><strong>Recuperação</strong></td>
+                <td>Backup, restauração e log de transações para voltar de uma falha</td>
+                <td>24</td>
+              </tr>
+              <tr>
+                <td><strong>Desempenho</strong></td>
+                <td>Índices e otimizador de consultas escolhendo o caminho mais barato</td>
+                <td>21</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="uc-alerta uc-alerta--conceito">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-boxes"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Três nomes que não são sinônimos</span>
+            <p class="mb-1">
+              <strong>Banco de dados</strong> é a coleção organizada de dados — no nosso caso, o
+              <code>BELLAMASSA</code>, com suas dezessete tabelas.
+            </p>
+            <p class="mb-1">
+              <strong>SGBD</strong> é o programa que gerencia esse banco — no nosso caso, o Microsoft
+              SQL Server 2022 Express.
+            </p>
+            <p class="mb-0">
+              <strong>SQL</strong> é a linguagem com que você fala com o SGBD. Ela é padronizada
+              (ANSI/ISO), mas cada produto tem o seu dialeto: o do SQL Server chama-se
+              <strong>T-SQL</strong>. Trocar esses três nomes é o erro de vocabulário mais comum da
+              unidade, e ele aparece em prova.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="papeis">
+        <h2>Quem trabalha com banco de dados</h2>
+        <p>
+          A UC10 forma o profissional que projeta e implementa. Vale saber para onde essa competência
+          se ramifica no mercado, porque os quatro papéis abaixo usam exatamente o conteúdo destes 24
+          encontros, com ênfases diferentes.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Papel</th>
+                <th scope="col">Foco do dia a dia</th>
+                <th scope="col">Módulos que mais usa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Desenvolvedor de banco de dados</strong></td>
+                <td>Modela, escreve DDL, procedures e consultas para a aplicação</td>
+                <td>1, 2 e 3</td>
+              </tr>
+              <tr>
+                <td><strong>DBA</strong> (administrador)</td>
+                <td>Instala, configura, monitora, faz backup, restaura e controla acesso</td>
+                <td>0 e 3</td>
+              </tr>
+              <tr>
+                <td><strong>Analista de dados</strong></td>
+                <td>Consulta, cruza e agrega para produzir relatórios e indicadores</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td><strong>Desenvolvedor de aplicação</strong></td>
+                <td>Consome o banco por código — JDBC, ORM, API — sem quebrar a integridade</td>
+                <td>2 e 3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="mapa-do-curso">
+        <h2>Mapa dos 24 encontros</h2>
+        <p>
+          A trilha completa está sempre na barra lateral, mas vale ver o desenho em blocos. Repare na
+          proporção: modelagem e SQL ocupam juntos 57 das 72 horas.
+        </p>
+
+        <div id="app-mapa-modulos"></div>
+
+        <p>
+          Três coisas para notar nesse mapa. Primeiro: você só instala o SGBD no <strong>encontro
+          03</strong> — os dois primeiros são conceituais de propósito, porque instalar sem saber o
+          que se está instalando é o caminho mais curto para uma instância mal configurada. Segundo:
+          o <strong>módulo 1 não tem SQL nenhum</strong>; ele termina com diagramas e um dicionário
+          de dados, e é isso que será cobrado no indicador 1. Terceiro: o <strong>módulo 3 é
+          curto</strong>, mas denso — ele fecha os indicadores 4 e 5 e concentra a entrega final.
+        </p>
+      </section>
+
+      <section id="avaliacao">
+        <h2>Como você será avaliado</h2>
+        <p>
+          A avaliação da UC10 é o próprio projeto da Bella Massa, entregue por partes ao longo do
+          curso e consolidado no encontro 24. Não existe "prova de decorar sintaxe": existe um banco
+          que funciona ou não funciona, e uma documentação que corresponde ou não corresponde a ele.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Entregável</th>
+                <th scope="col">Indicador</th>
+                <th scope="col">Construído no encontro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Documento de requisitos com regras de negócio numeradas</td>
+                <td><span class="badge text-bg-primary">IND 1</span></td>
+                <td>04</td>
+              </tr>
+              <tr>
+                <td>MER conceitual em notação de Chen</td>
+                <td><span class="badge text-bg-primary">IND 1</span></td>
+                <td>05 a 07</td>
+              </tr>
+              <tr>
+                <td>DER lógico em pé-de-galinha, normalizado até a 3FN</td>
+                <td><span class="badge text-bg-primary">IND 1</span></td>
+                <td>08 a 10</td>
+              </tr>
+              <tr>
+                <td>Dicionário de dados completo</td>
+                <td><span class="badge text-bg-primary">IND 1</span></td>
+                <td>11</td>
+              </tr>
+              <tr>
+                <td>Instância configurada e documentada</td>
+                <td><span class="badge text-bg-primary">IND 2</span></td>
+                <td>03</td>
+              </tr>
+              <tr>
+                <td>Script DDL completo, executável do zero</td>
+                <td><span class="badge text-bg-primary">IND 3</span></td>
+                <td>13 e 14</td>
+              </tr>
+              <tr>
+                <td>Carga de dados e 10 consultas de negócio</td>
+                <td><span class="badge text-bg-primary">IND 3</span></td>
+                <td>15 a 21</td>
+              </tr>
+              <tr>
+                <td>Rotina de importação de CSV e exportação de relatório</td>
+                <td><span class="badge text-bg-primary">IND 4</span></td>
+                <td>22</td>
+              </tr>
+              <tr>
+                <td>Procedures, funções e trigger de auditoria</td>
+                <td><span class="badge text-bg-primary">IND 3</span></td>
+                <td>23</td>
+              </tr>
+              <tr>
+                <td>Plano de backup, restauração testada e controle de acesso</td>
+                <td><span class="badge text-bg-primary">IND 5</span></td>
+                <td>24</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="uc-alerta uc-alerta--sucesso">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-folder-check"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Comece a pasta do projeto hoje</span>
+            <p class="mb-0">
+              Crie agora uma pasta <code>projeto-bellamassa</code> com quatro subpastas:
+              <code>requisitos</code>, <code>modelagem</code>, <code>scripts</code> e
+              <code>documentacao</code>. Cada encontro produz um arquivo que vai para uma delas. Quem
+              monta a entrega final no último dia sempre descobre que perdeu a versão boa do
+              diagrama.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <mao-na-massa id="mao-na-massa" sub="Esta aula é conceitual: os exercícios são de papel e caneta. Faça antes de abrir o gabarito.">
+        <exercicio-item nivel="aquecimento" titulo="Separe dado de informação">
+          <p>
+            Classifique cada item como <strong>dado</strong>, <strong>informação</strong> ou
+            <strong>conhecimento</strong>, e justifique em uma linha:
+          </p>
+          <ol>
+            <li><code>(11) 98877-1122</code></li>
+            <li>"O cliente Rafael Nunes pediu 2 calabresas família em 14/03/2026, total R$ 109,80."</li>
+            <li><code>2026-03-14</code></li>
+            <li>"Sexta-feira fatura o dobro de terça, então a escala de entregadores precisa dobrar."</li>
+          </ol>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ol>
+              <li><strong>Dado.</strong> Um número isolado; sem contexto não se sabe nem de quem é.</li>
+              <li>
+                <strong>Informação.</strong> Reúne cliente, produto, quantidade, data e valor — responde
+                "o que aconteceu naquele dia".
+              </li>
+              <li><strong>Dado.</strong> Uma data solta não responde nada.</li>
+              <li>
+                <strong>Conhecimento.</strong> É um padrão extraído de muitas informações, e já sustenta
+                uma decisão operacional.
+              </li>
+            </ol>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="básico" titulo="Diga qual indicador está em jogo">
+          <p>Para cada situação, aponte o indicador da UC que ela avalia:</p>
+          <ol>
+            <li>Você habilita o TCP/IP e fixa a porta 1433 na instância.</li>
+            <li>Você entrega um DER em pé-de-galinha com as cardinalidades marcadas.</li>
+            <li>Você carrega 2.000 pedidos antigos a partir de um arquivo CSV.</li>
+            <li>Você restaura o banco a partir do backup de ontem depois de um <code>DELETE</code> sem <code>WHERE</code>.</li>
+            <li>Você escreve a consulta de faturamento por categoria.</li>
+          </ol>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ol>
+              <li><strong>Indicador 2</strong> — instala e configura o SGBD.</li>
+              <li><strong>Indicador 1</strong> — elabora diagramas conforme os requisitos.</li>
+              <li><strong>Indicador 4</strong> — importa e exporta dados.</li>
+              <li><strong>Indicador 5</strong> — executa backup e restauração.</li>
+              <li><strong>Indicador 3</strong> — desenvolve scripts SQL coerentes com o modelo.</li>
+            </ol>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="básico" titulo="Justifique a troca da planilha">
+          <p>
+            A gestora pergunta: "por que eu vou gastar com isso se a planilha funciona?". Escreva
+            quatro argumentos técnicos, um para cada problema estudado, usando um exemplo concreto da
+            pizzaria em cada um.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ul>
+              <li>
+                <strong>Redundância:</strong> o telefone da Helena está repetido em 412 linhas. Se ela
+                mudar de número, são 412 células para corrigir — e basta esquecer uma.
+              </li>
+              <li>
+                <strong>Inconsistência:</strong> "Calabresa", "calabreza" e "Calabresa G" hoje contam
+                como três produtos diferentes, e por isso o relatório do contador não fecha.
+              </li>
+              <li>
+                <strong>Anomalia de exclusão:</strong> ao apagar a linha do único pedido de um cliente,
+                o endereço dele desaparece junto, porque só existia naquela linha.
+              </li>
+              <li>
+                <strong>Concorrência:</strong> na sexta à noite dois atendentes anotam pedidos ao mesmo
+                tempo; quem salvar por último sobrescreve os pedidos do outro.
+              </li>
+            </ul>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="intermediário" titulo="Primeiras regras de negócio">
+          <p>
+            Sem entrevistar ninguém ainda, e só a partir do que você leu sobre a Bella Massa, escreva
+            cinco regras de negócio no formato <em>"Todo/Cada X ..."</em> ou <em>"Um X pode ..."</em>.
+            Guarde este papel: no encontro 04 você vai confrontá-lo com a entrevista real da gestora.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito comentado</summary>
+            <p>Não existe uma resposta única. Cinco regras defensáveis a partir do texto desta aula:</p>
+            <ol>
+              <li>Todo pedido pertence a exatamente um cliente.</li>
+              <li>Um pedido pode conter vários produtos, e um produto aparece em vários pedidos.</li>
+              <li>Cada produto tem um preço diferente para cada tamanho em que é vendido.</li>
+              <li>Um pedido de delivery gera uma entrega; um pedido de salão ocupa uma mesa.</li>
+              <li>Toda ligação recebida é registrada, mesmo quando o número não é de cliente cadastrado.</li>
+            </ol>
+            <p class="mb-0">
+              Se as suas cinco regras usam substantivos (cliente, pedido, produto, tamanho, mesa,
+              entrega), você já encontrou as primeiras <strong>entidades</strong> — que é exatamente o
+              que o encontro 04 vai formalizar.
+            </p>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="desafio" titulo="Localize as respostas no mapa do curso">
+          <p>
+            Para cada dúvida abaixo, diga em qual encontro ela será respondida. Use a barra lateral ou
+            a busca do site.
+          </p>
+          <ol>
+            <li>"Como eu garanto que ninguém cadastre o mesmo CPF duas vezes?"</li>
+            <li>"Como eu descubro quais clientes nunca pediram nada?"</li>
+            <li>"Como eu registro automaticamente quem mudou o preço de uma pizza?"</li>
+            <li>"Como eu volto o banco ao estado de ontem à noite?"</li>
+          </ol>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ol>
+              <li>Encontro <strong>14</strong> — constraints <code>UNIQUE</code> e <code>CHECK</code>.</li>
+              <li>Encontro <strong>19</strong> — <code>LEFT JOIN</code>, ou encontro 20 com <code>NOT EXISTS</code>.</li>
+              <li>Encontro <strong>23</strong> — trigger de auditoria com as tabelas <code>inserted</code> e <code>deleted</code>.</li>
+              <li>Encontro <strong>24</strong> — <code>RESTORE</code> e modelos de recuperação.</li>
+            </ol>
+            <p class="mb-0">
+              O objetivo do exercício não é a resposta: é você perceber que toda dúvida prática do
+              curso já tem endereço na trilha.
+            </p>
+          </details>
+        </exercicio-item>
+      </mao-na-massa>
+
+      <section id="erros-comuns" class="uc-erros">
+        <h2>Erros comuns</h2>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Conceito</span>
+            <span class="uc-erro__titulo">Chamar o SGBD de "banco de dados"</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              "Vou instalar um banco de dados" e "o Excel é um banco de dados" são as duas frases que
+              denunciam a confusão. Instalar, você instala o <strong>SGBD</strong>; o banco você
+              <em>cria</em> depois, com um comando. E o Excel é uma planilha eletrônica: guarda dados,
+              mas não oferece nenhuma das seis funções da tabela acima.
+            </p>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> use a frase de teste — "o SQL Server 2022 Express (SGBD) gerencia
+            o banco BELLAMASSA (banco de dados), e eu falo com ele em T-SQL (linguagem)". Se a sua
+            frase não couber nesse molde, algum dos três nomes está no lugar errado.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Msg 911</span>
+            <span class="uc-erro__titulo">Achar que instalar o SGBD já cria o banco</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              Consequência direta do erro anterior. Terminada a instalação, existem apenas os bancos
+              de sistema (<code>master</code>, <code>model</code>, <code>msdb</code>,
+              <code>tempdb</code>). O banco do projeto não existe até você criá-lo, e isso só acontece
+              no encontro 13.
+            </p>
+            <sql-terminal variant="erro" banco="master" titulo="prévia: o banco que ainda não existe">
+              <script type="text/plain" slot="sql">USE BELLAMASSA;
+GO</script>
+              <script type="text/plain" slot="saida">Msg 911, Level 16, State 1, Line 1
+Database 'BELLAMASSA' does not exist. Make sure that the name is entered correctly.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> depois de instalar, liste o que existe com
+            <code>SELECT name FROM sys.databases;</code> — você verá os quatro bancos de sistema e mais
+            nada. O encontro 03 faz exatamente essa verificação.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Método</span>
+            <span class="uc-erro__titulo">Começar o projeto pelo CREATE TABLE</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              É a tentação de quem já viu SQL antes: abrir o editor e começar a criar tabelas
+              "enquanto o modelo não fica pronto". O resultado é sempre o mesmo — o diagrama entregue
+              no fim é desenhado <em>a partir</em> das tabelas, para justificar o que já existe, e
+              deixa de ser um projeto para virar uma legenda.
+            </p>
+            <p class="mb-0">
+              É também o caminho mais rápido para perder nota no indicador 1, porque a incoerência
+              entre diagrama e banco fica visível na primeira conferência.
+            </p>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> respeite a ordem da unidade — requisito (04), modelo conceitual
+            (05 a 07), modelo lógico (08 a 10), dicionário (11) e só então DDL (13). Nenhum
+            <code>CREATE TABLE</code> antes do encontro 13, nem por curiosidade.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Conceito</span>
+            <span class="uc-erro__titulo">Confundir SQL com SQL Server</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              "Eu sei SQL Server" e "eu sei SQL" dizem coisas diferentes. SQL é a linguagem
+              padronizada; SQL Server é um produto da Microsoft que a implementa com extensões
+              próprias — o T-SQL. MySQL, PostgreSQL, Oracle e SQLite também falam SQL, com dialetos
+              distintos.
+            </p>
+            <p class="mb-0">
+              O núcleo (<code>SELECT</code>, <code>JOIN</code>, <code>GROUP BY</code>) é praticamente o
+              mesmo em todos. As diferenças aparecem em funções de data, limitação de linhas
+              (<code>TOP</code> no T-SQL, <code>LIMIT</code> no MySQL e no PostgreSQL) e em tudo que é
+              procedural.
+            </p>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> aprenda o padrão e saiba o que é dialeto. Este curso marca
+            explicitamente, em nota, sempre que um comando for específico do T-SQL — assim você leva a
+            competência para qualquer SGBD.
+          </div>
+        </article>
+      </section>
+
+      <checklist-aula id="checklist" chave="aula-01">
+        <script type="application/json">
+        [
+          "Explicar em uma frase o que a UC10 desenvolve e quantas horas ela tem",
+          "Citar os cinco indicadores e dizer o que cada um exige como evidência",
+          "Diferenciar dado, informação e conhecimento com exemplos próprios",
+          "Explicar redundância, inconsistência, anomalia de exclusão e concorrência para quem não é da área",
+          "Listar quatro funções de um SGBD que uma planilha não oferece",
+          "Usar corretamente os termos banco de dados, SGBD e SQL na mesma frase",
+          "Dizer o que é o projeto integrador da Bella Massa e quais entregáveis ele exige",
+          "Localizar na trilha em que encontro cada entregável do projeto é construído"
+        ]
+        </script>
+      </checklist-aula>
+
+      <quiz-aula id="quiz" chave="aula-01">
+        <script type="application/json">
+        [
+          {
+            "pergunta": "Qual alternativa usa corretamente os termos banco de dados, SGBD e SQL?",
+            "alternativas": [
+              { "texto": "O SQL Server 2022 é o SGBD que gerencia o banco BELLAMASSA, consultado em T-SQL.", "certa": true, "feedback": "Correto. SGBD é o produto que gerencia; banco de dados é a coleção de dados; SQL (aqui no dialeto T-SQL) é a linguagem. Essa é a frase de teste da aula." },
+              { "texto": "O SQL é o SGBD que gerencia o banco de dados SQL Server.", "certa": false, "feedback": "Inverte tudo. SQL é linguagem, não programa; e SQL Server é o SGBD, não o banco." },
+              { "texto": "BELLAMASSA é o SGBD instalado na máquina, e o SQL Server é o banco de dados.", "certa": false, "feedback": "Também invertido. BELLAMASSA é o banco criado dentro da instância; o SQL Server é o software que a executa." },
+              { "texto": "Banco de dados e SGBD são o mesmo conceito; SQL é o nome comercial.", "certa": false, "feedback": "São conceitos distintos: o SGBD é o software gerenciador, o banco é o conjunto de dados que ele guarda. E SQL é uma linguagem padronizada, não uma marca." }
+            ]
+          },
+          {
+            "pergunta": "Na planilha da pizzaria, o telefone da cliente Helena aparece repetido em 412 linhas de pedido. Que problema é esse, e qual a consequência mais provável?",
+            "alternativas": [
+              { "texto": "Redundância, que leva à inconsistência quando o telefone muda e nem todas as linhas são atualizadas.", "certa": true, "feedback": "Correto. Redundância é o dado repetido; a inconsistência é a consequência quase inevitável, porque basta esquecer uma célula para o mesmo cliente passar a ter dois telefones diferentes." },
+              { "texto": "Anomalia de exclusão, porque apagar uma linha apagaria o telefone.", "certa": false, "feedback": "A anomalia de exclusão é outra: ocorre quando apagar um fato destrói junto uma informação que só existia ali. Com 412 cópias, apagar uma não perde nada — o problema é o oposto, o excesso." },
+              { "texto": "Problema de concorrência, porque duas pessoas podem editar as linhas ao mesmo tempo.", "certa": false, "feedback": "Concorrência é sobre acesso simultâneo, e existiria mesmo sem repetição alguma. Aqui o dado repetido é o problema em si." },
+              { "texto": "Nenhum: repetir o telefone acelera a consulta, pois evita procurar em outra tabela.", "certa": false, "feedback": "Evitar uma busca não compensa perder a confiabilidade do dado. E o custo dessa busca é exatamente o que os índices do encontro 21 resolvem." }
+            ]
+          },
+          {
+            "pergunta": "Você entrega um DER em pé-de-galinha com todas as cardinalidades marcadas, coerente com a entrevista do cliente. Qual indicador está sendo avaliado?",
+            "alternativas": [
+              { "texto": "Indicador 1 — elabora diagramas conceituais e lógicos de acordo com os requisitos levantados.", "certa": true, "feedback": "Correto. E note as duas partes do enunciado: não basta o diagrama estar bem desenhado, ele precisa corresponder aos requisitos que você mesmo levantou." },
+              { "texto": "Indicador 3 — desenvolve scripts SQL.", "certa": false, "feedback": "O indicador 3 começa a valer quando o diagrama vira CREATE TABLE, no módulo 2. Um DER não contém SQL." },
+              { "texto": "Indicador 2 — instala e configura o SGBD.", "certa": false, "feedback": "Modelagem é feita em papel ou em ferramenta de diagrama; ela não depende de instância nenhuma instalada." },
+              { "texto": "Nenhum: diagramas são material de apoio e não entram na avaliação.", "certa": false, "feedback": "Ao contrário — o diagrama é o entregável central do módulo 1 e o primeiro indicador do plano de ensino." }
+            ]
+          },
+          {
+            "pergunta": "Por que o curso só instala o SQL Server no encontro 03, e não no primeiro dia?",
+            "alternativas": [
+              { "texto": "Porque instalar exige decisões (instância, autenticação, collation) que só fazem sentido depois dos conceitos das aulas 01 e 02.", "certa": true, "feedback": "Correto. Escolher modo de autenticação e collation sem saber o que são produz uma instância mal configurada que só cobra a conta semanas depois." },
+              { "texto": "Porque o SQL Server Express só pode ser baixado depois de um cadastro que leva dois dias.", "certa": false, "feedback": "O download é livre e imediato. A razão da ordem é didática, não burocrática." },
+              { "texto": "Porque a modelagem inteira precisa estar pronta antes de qualquer instalação.", "certa": false, "feedback": "A instalação vem no encontro 03, antes de toda a modelagem, que ocupa os encontros 04 a 12. O pré-requisito é a teoria dos dois primeiros encontros, não o modelo." },
+              { "texto": "Porque a instalação é responsabilidade do DBA e não do desenvolvedor.", "certa": false, "feedback": "O indicador 2 do plano de ensino atribui a instalação e a configuração a você. Este curso as pratica no encontro 03." }
+            ]
+          },
+          {
+            "pergunta": "\"Calabresa responde por 38% do faturamento; nunca deixar faltar.\" Essa frase é um exemplo de quê?",
+            "alternativas": [
+              { "texto": "Conhecimento — um padrão extraído de muitas informações, que sustenta uma decisão.", "certa": true, "feedback": "Correto. Ela não vem de um registro isolado: vem de milhares de dados agregados e transformados em critério de compra." },
+              { "texto": "Dado — porque contém um número, 38%.", "certa": false, "feedback": "Um número só é dado quando está solto, sem contexto. Aqui ele é resultado de um cálculo sobre muitos dados e já vem interpretado." },
+              { "texto": "Informação — porque descreve um fato ocorrido.", "certa": false, "feedback": "Está perto. Informação seria \"vendemos 412 calabresas no trimestre\". A frase vai além: ela generaliza e recomenda uma ação." },
+              { "texto": "Metadado — porque descreve outros dados.", "certa": false, "feedback": "Metadado é dado sobre a estrutura: nome de coluna, tipo, tamanho. É o conteúdo do dicionário de dados do encontro 11, não este caso." }
+            ]
+          }
+        ]
+        </script>
+      </quiz-aula>
+
+      <div id="app-script"></div>
+    </article>
+
+    <div id="app-prevnext"></div>
+  </main>
+
+  <div id="app-rodape"></div>
+</div>
+
+<script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>

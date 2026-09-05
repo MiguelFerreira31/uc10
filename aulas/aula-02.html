@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 02 · Modelos de dados, ANSI/SPARC e o modelo relacional · UC10</title>
+<meta name="description" content="Evolução dos modelos de dados, o modelo relacional de Codd, relação, tupla, atributo, domínio e chave, arquitetura ANSI/SPARC em três esquemas e as sublinguagens do SQL.">
+<script>try{var t=JSON.parse(localStorage.getItem('uc10:tema'));if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/terminal.css">
+<link rel="stylesheet" href="../assets/css/didatico.css">
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</head>
+<body data-pagina="aula">
+
+<a class="uc-skip" href="#conteudo">Pular para o conteúdo</a>
+<header id="app-navbar"></header>
+<aside id="app-sidebar"></aside>
+
+<div class="uc-conteudo">
+  <main id="conteudo" class="container-xxl px-3 px-lg-4 py-4">
+
+    <div id="app-breadcrumb"></div>
+    <div id="app-cabecalho"></div>
+
+    <article>
+
+      <section id="objetivos">
+        <h2 class="visually-hidden">Objetivos de aprendizagem</h2>
+        <div class="uc-objetivos">
+          <p class="mb-1"><strong>Ao fim desta aula você será capaz de:</strong></p>
+          <ul class="mb-0">
+            <li>Comparar os modelos hierárquico, em rede, relacional e NoSQL, dizendo o que cada um resolve.</li>
+            <li>Usar corretamente relação, tupla, atributo, domínio, grau e cardinalidade, ligando cada termo ao seu equivalente em SQL.</li>
+            <li>Explicar os três esquemas da arquitetura ANSI/SPARC e o que cada um esconde do nível de cima.</li>
+            <li>Distinguir modelo conceitual, lógico e físico apresentando o mesmo trecho do modelo nos três níveis.</li>
+            <li>Classificar um comando SQL em DDL, DML, DQL, DCL ou TCL.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="problematizacao">
+        <h2>Problematização</h2>
+        <p>
+          Na aula anterior ficou decidido que a Bella Massa precisa de um banco de dados. Falta uma
+          pergunta que quase ninguém faz e que muda tudo: <em>banco de dados de que tipo?</em>
+          "Relacional" é uma escolha, não uma lei da natureza. Existiram modelos antes dele e existem
+          modelos depois, e alguns deles resolveriam partes deste problema melhor.
+        </p>
+        <p>
+          Esta aula ainda é de quadro. Ela responde três coisas: por que o modelo relacional venceu,
+          qual é o vocabulário exato que você vai usar nos próximos 22 encontros, e por que a mesma
+          base de dados é descrita em três níveis diferentes — o que o atendente vê, o que você
+          desenha e o que o disco guarda.
+        </p>
+      </section>
+
+      <section id="modelos-de-dados">
+        <h2>A evolução dos modelos de dados</h2>
+        <p>
+          Um <strong>modelo de dados</strong> é o conjunto de conceitos usados para descrever a
+          estrutura de um banco: que formas os dados podem ter e como se ligam. Cinco famílias
+          importam para a sua formação:
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Modelo</th>
+                <th scope="col">Época</th>
+                <th scope="col">Como organiza</th>
+                <th scope="col">Limite que motivou o sucessor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Hierárquico</strong></td>
+                <td>Anos 1960 (IMS, IBM)</td>
+                <td>Árvore: cada registro tem um pai só</td>
+                <td>Não representa "muitos para muitos" sem duplicar dados</td>
+              </tr>
+              <tr>
+                <td><strong>Em rede</strong></td>
+                <td>Anos 1970 (CODASYL)</td>
+                <td>Grafo de ponteiros entre registros</td>
+                <td>A consulta precisa saber o caminho físico; mudar a estrutura quebra os programas</td>
+              </tr>
+              <tr>
+                <td><strong>Relacional</strong></td>
+                <td>1970 (Codd)</td>
+                <td>Tabelas ligadas por valor, não por ponteiro</td>
+                <td>Encaixa mal dados sem esquema fixo e escala horizontal difícil</td>
+              </tr>
+              <tr>
+                <td><strong>Orientado a objetos</strong></td>
+                <td>Anos 1990</td>
+                <td>Objetos com identidade, herança e métodos</td>
+                <td>Baixa adoção; sobreviveu como recurso dentro dos relacionais</td>
+              </tr>
+              <tr>
+                <td><strong>NoSQL</strong></td>
+                <td>A partir de 2009</td>
+                <td>Documento, chave-valor, coluna larga ou grafo</td>
+                <td>Abre mão de parte da consistência e da integridade declarada</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          A diferença fica clara com um exemplo. Um pedido da Bella Massa, com cliente e itens, no
+          modelo <strong>hierárquico</strong> é uma árvore: tudo pendurado no pedido.
+        </p>
+
+        <mermaid-diagram
+          legenda="O mesmo pedido no modelo hierárquico: uma árvore com um pai só por nó."
+          descricao="Um nó chamado Pedido 1401 no topo, com quatro filhos: Cliente Helena Duarte, Item Calabresa, Item Refrigerante e Entrega. O cliente aparece pendurado dentro do pedido, e por isso precisa ser repetido em cada pedido que ele fizer.">
+          <script type="text/plain">
+flowchart TB
+    P["PEDIDO 1401"] --> C["CLIENTE: Helena Duarte, (11) 3555-1020"]
+    P --> I1["ITEM: Calabresa familia, qt 1, R$ 54,90"]
+    P --> I2["ITEM: Refrigerante 2L, qt 2, R$ 8,00"]
+    P --> E["ENTREGA: Douglas Ramos, 20:41"]
+          </script>
+        </mermaid-diagram>
+
+        <p>
+          Funciona para ler um pedido. Quebra na segunda pergunta do negócio: <em>quais pedidos a
+          Helena já fez?</em> Como o cliente vive <strong>dentro</strong> de cada pedido, ele está
+          repetido em todos eles — a mesma redundância da planilha, agora com nome de modelo. E se ela
+          trocar de telefone, é preciso percorrer a árvore inteira.
+        </p>
+        <p>
+          No modelo <strong>relacional</strong>, cliente e pedido são coisas separadas que se ligam
+          por um valor em comum. Ninguém está dentro de ninguém:
+        </p>
+
+        <result-set legenda="Relação cliente — o dado do cliente existe uma vez só">
+          <script type="application/json">
+          {
+            "colunas": [
+              { "nome": "id_cliente", "tipo": "num" },
+              { "nome": "nm_cliente", "tipo": "texto", "largura": 16 },
+              { "nome": "nr_telefone", "tipo": "texto", "largura": 16 }
+            ],
+            "linhas": [[1, "Helena Duarte", "(11) 3555-1020"], [2, "Rafael Nunes", "(11) 3555-7788"]],
+            "afetadas": 2
+          }
+          </script>
+        </result-set>
+
+        <result-set legenda="Relação pedido — guarda apenas a referência ao cliente, pelo valor da chave">
+          <script type="application/json">
+          {
+            "colunas": [
+              { "nome": "id_pedido", "tipo": "num" },
+              { "nome": "id_cliente", "tipo": "num" },
+              { "nome": "dt_pedido", "tipo": "texto", "largura": 19 }
+            ],
+            "linhas": [[1401, 1, "2026-03-14 20:12:00"], [1402, 1, "2026-03-21 19:58:00"], [1403, 2, "2026-03-21 20:03:00"]],
+            "afetadas": 3
+          }
+          </script>
+        </result-set>
+
+        <p>
+          A Helena aparece uma vez em <code>cliente</code> e é referenciada duas vezes em
+          <code>pedido</code>, pelo valor <code>1</code>. Trocar o telefone dela é alterar uma linha.
+          Essa ideia — <strong>ligar por valor, não por ponteiro</strong> — é a contribuição central
+          do modelo relacional.
+        </p>
+
+        <div class="uc-alerta uc-alerta--info">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-diagram-3"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">NoSQL não é o "próximo" modelo</span>
+            <p class="mb-0">
+              É uma família de alternativas para problemas específicos: catálogo com campos que variam
+              por produto (documento), sessão de usuário (chave-valor), rede de amigos (grafo). Nenhuma
+              delas substitui o relacional em um sistema com transações e regras de integridade, que é
+              exatamente o caso de uma pizzaria com pagamento. O encontro 24 fecha o curso com esse
+              comparativo — e você vai chegar lá sabendo o que está comparando.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="relacional">
+        <h2>O modelo relacional de Codd</h2>
+        <p>
+          Em 1970, Edgar F. Codd, matemático da IBM, publicou <em>A Relational Model of Data for Large
+          Shared Data Banks</em>. A proposta era radical para a época: descrever os dados usando
+          <strong>teoria dos conjuntos</strong> e <strong>lógica de predicados</strong>, e proibir que
+          o programa soubesse como eles estavam guardados.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Princípio</th>
+                <th scope="col">O que significa</th>
+                <th scope="col">Consequência prática no curso</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Tudo é relação</strong></td>
+                <td>Só existe uma estrutura de dados: a relação (tabela)</td>
+                <td>Não há registro "dentro" de outro; hierarquia vira chave estrangeira</td>
+              </tr>
+              <tr>
+                <td><strong>Acesso por conteúdo</strong></td>
+                <td>Uma linha é encontrada pelo valor dos seus atributos, nunca por endereço</td>
+                <td><code>WHERE id_cliente = 1</code>, e não "o terceiro registro do arquivo"</td>
+              </tr>
+              <tr>
+                <td><strong>Independência física</strong></td>
+                <td>Como os dados estão gravados não afeta como são consultados</td>
+                <td>Criar um índice no encontro 21 não muda uma linha das suas consultas</td>
+              </tr>
+              <tr>
+                <td><strong>Integridade declarada</strong></td>
+                <td>As regras ficam no banco, não espalhadas nos programas</td>
+                <td>Uma <code>CHECK</code> vale para o sistema, para o SSMS e para o estagiário</td>
+              </tr>
+              <tr>
+                <td><strong>Linguagem de conjuntos</strong></td>
+                <td>Você descreve o resultado desejado, não o algoritmo de busca</td>
+                <td>SQL é declarativa: quem decide o caminho é o otimizador</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="uc-alerta uc-alerta--conceito">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-braces"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Declarativo, não procedural</span>
+            <p class="mb-0">
+              Em uma linguagem procedural você escreveria: "abra o arquivo, leia linha a linha, compare
+              o campo 3, guarde os que baterem". Em SQL você escreve <em>o que quer</em> —
+              <code>SELECT nm_cliente FROM cliente WHERE id_cliente = 1</code> — e o SGBD decide se usa
+              índice, em que ordem lê e quanta memória gasta. É por isso que a mesma consulta fica mais
+              rápida quando você cria um índice, sem trocar uma vírgula dela.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="vocabulario">
+        <h2>Relação, tupla, atributo, domínio e chave</h2>
+        <p>
+          Cada conceito tem três nomes: o formal (da teoria de Codd), o do SQL e o coloquial de quem
+          veio de arquivos. A banca usa o formal; o produto usa o do SQL. Saiba os dois.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Formal</th>
+                <th scope="col">Em SQL</th>
+                <th scope="col">Coloquial</th>
+                <th scope="col">Definição</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Relação</strong></td>
+                <td>Tabela</td>
+                <td>Arquivo</td>
+                <td>Conjunto de tuplas com a mesma estrutura</td>
+              </tr>
+              <tr>
+                <td><strong>Tupla</strong></td>
+                <td>Linha</td>
+                <td>Registro</td>
+                <td>Uma ocorrência: um cliente, um pedido</td>
+              </tr>
+              <tr>
+                <td><strong>Atributo</strong></td>
+                <td>Coluna</td>
+                <td>Campo</td>
+                <td>Uma propriedade da entidade</td>
+              </tr>
+              <tr>
+                <td><strong>Domínio</strong></td>
+                <td>Tipo + <code>CHECK</code></td>
+                <td>Formato</td>
+                <td>O conjunto de valores que o atributo pode assumir</td>
+              </tr>
+              <tr>
+                <td><strong>Grau</strong></td>
+                <td>Nº de colunas</td>
+                <td>—</td>
+                <td>Quantos atributos a relação tem</td>
+              </tr>
+              <tr>
+                <td><strong>Cardinalidade</strong></td>
+                <td>Nº de linhas</td>
+                <td>—</td>
+                <td>Quantas tuplas a relação tem <em>neste momento</em></td>
+              </tr>
+              <tr>
+                <td><strong>Chave primária</strong></td>
+                <td><code>PRIMARY KEY</code></td>
+                <td>Código</td>
+                <td>Atributo (ou conjunto) que identifica cada tupla sem ambiguidade</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Aplicando na relação <code>cliente</code> mostrada acima: ela tem <strong>grau 3</strong>
+          (três atributos) e <strong>cardinalidade 2</strong> (duas tuplas). O domínio de
+          <code>id_cliente</code> são os inteiros positivos; o de <code>nm_cliente</code>, textos de
+          até 120 caracteres. E a chave primária é <code>id_cliente</code>.
+        </p>
+
+        <div class="uc-alerta uc-alerta--atencao">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Duas cardinalidades diferentes</span>
+            <p class="mb-0">
+              A palavra <em>cardinalidade</em> aparece em dois contextos nesta unidade, com sentidos
+              distintos. Aqui, cardinalidade <strong>de uma relação</strong> é a quantidade de linhas
+              que ela tem agora — muda a cada <code>INSERT</code>. No encontro 06, cardinalidade
+              <strong>de um relacionamento</strong> é a regra 1:1, 1:N ou N:N — e não muda nunca, porque
+              é parte do modelo. Quando alguém disser só "cardinalidade", pergunte de qual das duas se
+              trata.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="ansi-sparc">
+        <h2>Arquitetura ANSI/SPARC em três esquemas</h2>
+        <p>
+          Em 1975 o comitê ANSI/SPARC propôs separar a descrição de um banco em três níveis. A ideia
+          organiza até hoje a arquitetura de qualquer SGBD relacional, e explica por que o atendente da
+          pizzaria, você e o disco enxergam a mesma base de três formas diferentes.
+        </p>
+
+        <mermaid-diagram
+          legenda="Os três esquemas do ANSI/SPARC aplicados ao banco da Bella Massa."
+          descricao="Dois usuários no topo: o atendente e o contador. Cada um acessa uma visão diferente no nível externo: vw_agenda e vw_faturamento. As duas visões apoiam-se no nível conceitual, que é o esquema completo com dezessete tabelas, chaves e restrições. O nível conceitual apoia-se no nível interno, formado pelos arquivos bellamassa.mdf e bellamassa.ldf, páginas de 8 KB e índices.">
+          <script type="text/plain">
+flowchart TB
+    A["Atendente: precisa de nome e telefone"] --> V1
+    B["Contador: precisa de faturamento por mes"] --> V2
+    V1["NIVEL EXTERNO - vw_agenda"] --> C
+    V2["NIVEL EXTERNO - vw_faturamento"] --> C
+    C["NIVEL CONCEITUAL - 17 tabelas, chaves, restricoes e relacionamentos"] --> D
+    D["NIVEL INTERNO - bellamassa.mdf e bellamassa.ldf, paginas de 8 KB, indices"]
+          </script>
+        </mermaid-diagram>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Nível</th>
+                <th scope="col">Descreve</th>
+                <th scope="col">Quem se importa</th>
+                <th scope="col">Na Bella Massa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Externo</strong> (visão)</td>
+                <td>O recorte que cada grupo de usuários enxerga</td>
+                <td>Usuário final e aplicação</td>
+                <td>Uma <code>VIEW</code> com nome e telefone, sem valores nem custos</td>
+              </tr>
+              <tr>
+                <td><strong>Conceitual</strong> (lógico)</td>
+                <td>Todas as entidades, atributos, relacionamentos e regras</td>
+                <td>Projetista do banco — você</td>
+                <td>As 17 tabelas, com chaves e restrições</td>
+              </tr>
+              <tr>
+                <td><strong>Interno</strong> (físico)</td>
+                <td>Como os dados são gravados: arquivos, páginas, índices</td>
+                <td>SGBD e DBA</td>
+                <td><code>bellamassa.mdf</code>, <code>bellamassa.ldf</code> e os índices</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          O ponto da arquitetura não é a existência dos três níveis: é o <strong>isolamento</strong>
+          entre eles. Cada nível esconde do nível de cima as decisões que tomou.
+        </p>
+      </section>
+
+      <section id="independencia">
+        <h2>Independência de dados</h2>
+        <p>
+          É o benefício concreto que os três esquemas entregam, e vem em duas formas. Guarde os dois
+          nomes: eles caem em prova e explicam metade das boas práticas do curso.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Tipo</th>
+                <th scope="col">Definição</th>
+                <th scope="col">Exemplo na pizzaria</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Independência física</strong></td>
+                <td>Mudar o nível interno não afeta o conceitual nem o externo</td>
+                <td>Criar um índice em <code>dt_pedido</code>, ou mover o <code>.mdf</code> para outro disco: nenhuma consulta muda</td>
+              </tr>
+              <tr>
+                <td><strong>Independência lógica</strong></td>
+                <td>Mudar o nível conceitual não afeta as visões existentes</td>
+                <td>Acrescentar a coluna <code>fl_vegana</code> em <code>produto</code>: a tela do atendente continua funcionando</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          A independência lógica é a mais difícil de conseguir e a que mais se perde na prática — basta
+          uma aplicação escrever <code>SELECT *</code> para que acrescentar uma coluna quebre a tela.
+          Este é o primeiro motivo, entre vários, para nunca usar <code>SELECT *</code> em código de
+          produção; o encontro 16 volta ao assunto.
+        </p>
+      </section>
+
+      <section id="niveis-modelo">
+        <h2>Conceitual, lógico e físico</h2>
+        <p>
+          Projetar um banco é descer uma escada de três degraus. O mesmo pedaço de realidade é descrito
+          três vezes, cada vez com mais compromisso técnico. Veja a entidade <code>cliente</code> nos
+          três degraus.
+        </p>
+
+        <h3>Degrau 1 — modelo conceitual</h3>
+        <p>
+          Fala a língua do negócio. Não menciona tipo de dado, tamanho de coluna nem produto de SGBD.
+          A notação clássica é a de Chen: retângulo para entidade, elipse para atributo, atributo
+          identificador sublinhado. É o que você vai desenhar nos encontros 05 a 07.
+        </p>
+
+        <chen-diagram legenda="Modelo conceitual: a entidade CLIENTE e seus atributos, em notação de Chen." viewbox="0 0 760 270">
+          <script type="application/json">
+          {
+            "larguraMax": 700,
+            "descricao": "Um retângulo chamado CLIENTE na parte de baixo. Três linhas sobem dele até três elipses: id_cliente, sublinhada por ser o atributo identificador, nm_cliente e dt_cadastro.",
+            "formas": [
+              { "tipo": "linha", "de": [300,172], "para": [150,107] },
+              { "tipo": "linha", "de": [380,172], "para": [380,107] },
+              { "tipo": "linha", "de": [460,172], "para": [610,107] },
+              { "tipo": "entidade", "x": 380, "y": 200, "w": 210, "rotulo": "CLIENTE" },
+              { "tipo": "atributo", "x": 150, "y": 82, "rotulo": "id_cliente", "chave": true },
+              { "tipo": "atributo", "x": 380, "y": 82, "rotulo": "nm_cliente" },
+              { "tipo": "atributo", "x": 610, "y": 82, "rotulo": "dt_cadastro" }
+            ]
+          }
+          </script>
+        </chen-diagram>
+
+        <h3>Degrau 2 — modelo lógico</h3>
+        <p>
+          Já assume o modelo relacional: tudo vira tabela, chave primária e chave estrangeira. Ainda
+          não escolhe o SGBD, mas escolhe a estrutura. A notação usual é a pé-de-galinha, e é o que os
+          encontros 08 a 10 produzem.
+        </p>
+
+        <er-diagram
+          legenda="Modelo lógico: a mesma entidade como tabela, com chave primária declarada."
+          descricao="A tabela CLIENTE com três colunas: id_cliente como chave primária do tipo inteiro, nm_cliente do tipo varchar e dt_cadastro do tipo datetime2.">
+          <script type="text/plain">
+erDiagram
+    CLIENTE {
+        int id_cliente PK
+        varchar nm_cliente
+        datetime2 dt_cadastro
+    }
+          </script>
+        </er-diagram>
+
+        <h3>Degrau 3 — modelo físico</h3>
+        <p>
+          Aqui entra o produto. Tipos do T-SQL, tamanhos, valores padrão, nomes de constraint,
+          <code>IDENTITY</code>. O mesmo cliente, agora em código que o SQL Server 2022 executa — é o
+          que você escreverá no encontro 13.
+        </p>
+
+        <sql-terminal banco="BELLAMASSA" titulo="prévia: o modelo físico da entidade cliente">
+          <script type="text/plain" slot="sql">CREATE TABLE cliente (
+    id_cliente   INT IDENTITY(1,1) NOT NULL,
+    nm_cliente   VARCHAR(120)      NOT NULL,
+    dt_cadastro  DATETIME2(0)      NOT NULL
+        CONSTRAINT DF_cliente_dt_cadastro DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_cliente PRIMARY KEY (id_cliente)
+);
+GO</script>
+          <script type="text/plain" slot="saida">Commands completed successfully.</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--conceito">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-arrow-down-square"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">A escada só desce</span>
+            <p class="mb-0">
+              Do conceitual para o físico existe um caminho: são as sete regras de mapeamento do
+              encontro 09. Do físico de volta para o conceitual não existe caminho automático — por
+              isso um banco criado sem modelo nunca produz um diagrama honesto depois. É a versão
+              técnica do erro "começar pelo <code>CREATE TABLE</code>" que a aula 01 apontou.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="sublinguagens">
+        <h2>DDL, DML, DQL, DCL e TCL</h2>
+        <p>
+          SQL é uma linguagem só, dividida por função em sublinguagens. Saber a qual grupo um comando
+          pertence antecipa o comportamento dele — sobretudo se a ação pode ou não ser desfeita por um
+          <code>ROLLBACK</code>.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Sigla</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Comandos</th>
+                <th scope="col">Mexe em</th>
+                <th scope="col">Encontro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>DDL</strong></td>
+                <td>Data Definition Language</td>
+                <td><code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>, <code>TRUNCATE</code></td>
+                <td>Estrutura</td>
+                <td>13 e 14</td>
+              </tr>
+              <tr>
+                <td><strong>DML</strong></td>
+                <td>Data Manipulation Language</td>
+                <td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>MERGE</code></td>
+                <td>Conteúdo</td>
+                <td>15</td>
+              </tr>
+              <tr>
+                <td><strong>DQL</strong></td>
+                <td>Data Query Language</td>
+                <td><code>SELECT</code></td>
+                <td>Nada — só lê</td>
+                <td>16 a 21</td>
+              </tr>
+              <tr>
+                <td><strong>DCL</strong></td>
+                <td>Data Control Language</td>
+                <td><code>GRANT</code>, <code>REVOKE</code>, <code>DENY</code></td>
+                <td>Permissões</td>
+                <td>24</td>
+              </tr>
+              <tr>
+                <td><strong>TCL</strong></td>
+                <td>Transaction Control Language</td>
+                <td><code>BEGIN TRAN</code>, <code>COMMIT</code>, <code>ROLLBACK</code></td>
+                <td>Limites da transação</td>
+                <td>15 e 24</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Um comando de cada, para você reconhecer a família pela forma. Todos rodam a partir do
+          encontro 13; aqui servem de referência visual:
+        </p>
+
+        <sql-terminal banco="BELLAMASSA" titulo="prévia: um comando de cada sublinguagem">
+          <script type="text/plain" slot="sql">-- DDL: define a estrutura
+CREATE TABLE forma_pagamento (
+    id_forma  INT         NOT NULL,
+    nm_forma  VARCHAR(30) NOT NULL,
+    CONSTRAINT PK_forma_pagamento PRIMARY KEY (id_forma)
+);
+GO
+
+-- DML: altera o conteudo
+INSERT INTO forma_pagamento (id_forma, nm_forma)
+VALUES (1, 'Dinheiro'), (2, 'Cartao de debito'), (3, 'PIX');
+GO
+
+-- DQL: apenas le
+SELECT id_forma, nm_forma FROM forma_pagamento ORDER BY nm_forma;
+GO
+
+-- DCL: controla o acesso
+GRANT SELECT ON dbo.forma_pagamento TO app_bellamassa;
+GO
+
+-- TCL: delimita a transacao
+BEGIN TRANSACTION;
+    UPDATE forma_pagamento SET nm_forma = 'Pix' WHERE id_forma = 3;
+ROLLBACK TRANSACTION;
+GO</script>
+          <script type="text/plain" slot="saida">Commands completed successfully.
+(3 rows affected)
+
+id_forma    nm_forma
+----------- ------------------------------
+          2 Cartao de debito
+          1 Dinheiro
+          3 PIX
+
+(3 rows affected)
+Commands completed successfully.
+(1 row affected)</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--atencao">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-arrow-counterclockwise"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">O ROLLBACK acima desfez o UPDATE</span>
+            <p class="mb-0">
+              Depois daquele bloco, a forma de pagamento continua gravada como <code>PIX</code>, e não
+              <code>Pix</code>: a transação foi desfeita. No SQL Server — diferente de alguns outros
+              SGBDs — <strong>DDL também é transacional</strong>, então um <code>CREATE TABLE</code>
+              dentro de uma transação desfeita também some. É um detalhe do produto que o encontro 15
+              explora.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="arquivos-fisicos">
+        <h2>O nível interno: .mdf e .ldf</h2>
+        <p>
+          O nível mais baixo do ANSI/SPARC tem nome de arquivo. Todo banco no SQL Server ocupa no
+          mínimo dois:
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Arquivo</th>
+                <th scope="col">Extensão</th>
+                <th scope="col">Guarda</th>
+                <th scope="col">Se você perder</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Dados primário</strong></td>
+                <td><code>.mdf</code></td>
+                <td>Tabelas, índices, metadados e as próprias definições do banco</td>
+                <td>Perde tudo que não estiver em backup</td>
+              </tr>
+              <tr>
+                <td><strong>Log de transações</strong></td>
+                <td><code>.ldf</code></td>
+                <td>O registro sequencial de toda alteração, antes de ela ser aplicada</td>
+                <td>Perde a capacidade de desfazer e de recuperar até um instante</td>
+              </tr>
+              <tr>
+                <td><strong>Dados secundário</strong></td>
+                <td><code>.ndf</code></td>
+                <td>Opcional: parte dos dados, em outro disco, para distribuir carga</td>
+                <td>Perde as tabelas que moravam nele</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Dentro do <code>.mdf</code>, o dado não fica solto: é organizado em <strong>páginas de 8
+          KB</strong>, agrupadas em <em>extents</em> de oito páginas (64 KB). Uma linha não pode
+          atravessar páginas, e é daí que vem o limite prático de 8.060 bytes por linha — um número
+          que reaparece no encontro 13, quando você escolher entre <code>VARCHAR(8000)</code> e
+          <code>VARCHAR(MAX)</code>.
+        </p>
+
+        <p>
+          Quem responde onde esses arquivos estão é o próprio banco. Esta consulta é a que você vai
+          executar de verdade na próxima aula, depois de instalar a instância:
+        </p>
+
+        <sql-terminal banco="master" titulo="prévia: o nível interno se apresentando">
+          <script type="text/plain" slot="sql">SELECT DB_NAME(database_id) AS banco,
+       name                 AS nome_logico,
+       type_desc            AS tipo,
+       physical_name        AS caminho
+  FROM sys.master_files
+ WHERE database_id = DB_ID('master');
+GO</script>
+          <script type="text/plain" slot="saida">banco   nome_logico tipo  caminho
+------- ----------- ----- --------------------------------------------------
+master  master      ROWS  C:\Program Files\Microsoft SQL Server\MSSQL16.SQL
+master  mastlog     LOG   C:\Program Files\Microsoft SQL Server\MSSQL16.SQL
+
+(2 rows affected)</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--perigo">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-shield-x"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Nunca copie um .mdf com o serviço no ar</span>
+            <p class="mb-0">
+              Copiar os arquivos de um banco ligado não é backup: o resultado é um arquivo inconsistente
+              e inútil, porque parte das alterações ainda está só no log. Backup se faz com o comando
+              <code>BACKUP DATABASE</code>, e é assunto do encontro 24 — indicador 5.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <mao-na-massa id="mao-na-massa" sub="Ainda sem computador: papel, caneta e vocabulário. Responda antes de abrir o gabarito.">
+        <exercicio-item nivel="aquecimento" titulo="Classifique os comandos">
+          <p>Diga a qual sublinguagem pertence cada comando e o que ele afeta:</p>
+          <ol>
+            <li><code>ALTER TABLE produto ADD fl_vegana BIT NOT NULL DEFAULT 0;</code></li>
+            <li><code>SELECT nm_produto FROM produto WHERE fl_vegana = 1;</code></li>
+            <li><code>REVOKE SELECT ON dbo.pagamento FROM app_bellamassa;</code></li>
+            <li><code>UPDATE produto SET fl_vegana = 1 WHERE id_produto = 12;</code></li>
+            <li><code>COMMIT TRANSACTION;</code></li>
+          </ol>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ol>
+              <li><strong>DDL</strong> — muda a estrutura da tabela, acrescentando uma coluna.</li>
+              <li><strong>DQL</strong> — apenas lê; nada no banco é alterado.</li>
+              <li><strong>DCL</strong> — retira uma permissão de um usuário.</li>
+              <li><strong>DML</strong> — altera o conteúdo de uma linha.</li>
+              <li><strong>TCL</strong> — confirma a transação aberta, tornando as alterações definitivas.</li>
+            </ol>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="básico" titulo="Grau e cardinalidade">
+          <p>
+            Observe a relação abaixo e responda: qual é o grau, qual é a cardinalidade, qual é
+            provavelmente a chave primária e qual o domínio de <code>qt_fatias</code>?
+          </p>
+          <result-set legenda="Relação tamanho">
+            <script type="application/json">
+            {
+              "colunas": [
+                { "nome": "id_tamanho", "tipo": "num" },
+                { "nome": "nm_tamanho", "tipo": "texto", "largura": 12 },
+                { "nome": "qt_fatias", "tipo": "num" }
+              ],
+              "linhas": [[1, "Broto", 4], [2, "Media", 6], [3, "Familia", 8], [4, "Gigante", 12]],
+              "afetadas": 4
+            }
+            </script>
+          </result-set>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ul>
+              <li><strong>Grau 3</strong> — três atributos.</li>
+              <li>
+                <strong>Cardinalidade 4</strong> — quatro tuplas <em>neste momento</em>. Cadastrar um
+                quinto tamanho muda esse número; o grau só mudaria com um <code>ALTER TABLE</code>.
+              </li>
+              <li>
+                <strong>Chave primária: <code>id_tamanho</code></strong>. Note que
+                <code>nm_tamanho</code> também identifica cada linha sem ambiguidade — ele é uma
+                <em>chave candidata</em>, e o encontro 05 trata dessa distinção.
+              </li>
+              <li>
+                <strong>Domínio de <code>qt_fatias</code>:</strong> inteiros positivos, na prática entre
+                4 e 12. No banco isso vira <code>TINYINT</code> mais uma restrição
+                <code>CHECK (qt_fatias BETWEEN 1 AND 24)</code>.
+              </li>
+            </ul>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="intermediário" titulo="Qual nível do ANSI/SPARC muda?">
+          <p>Para cada mudança, diga qual nível é alterado e quais níveis ficam protegidos:</p>
+          <ol>
+            <li>O DBA move o arquivo <code>bellamassa.mdf</code> para um SSD.</li>
+            <li>Você acrescenta a coluna <code>fl_vegana</code> na tabela <code>produto</code>.</li>
+            <li>O atendente passa a ver também o bairro do cliente na tela dele.</li>
+            <li>Você cria um índice em <code>pedido(dt_pedido)</code>.</li>
+          </ol>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ol>
+              <li>
+                <strong>Interno.</strong> Conceitual e externo intactos — é independência física
+                funcionando.
+              </li>
+              <li>
+                <strong>Conceitual.</strong> As visões existentes continuam válidas, desde que nenhuma
+                use <code>SELECT *</code>: é a independência lógica.
+              </li>
+              <li>
+                <strong>Externo.</strong> Só a visão muda; a estrutura das tabelas continua a mesma,
+                porque o bairro já estava lá.
+              </li>
+              <li>
+                <strong>Interno.</strong> Nenhuma consulta precisa ser reescrita — elas só ficam mais
+                rápidas.
+              </li>
+            </ol>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="intermediário" titulo="Desça a escada dos três degraus">
+          <p>
+            Pegue a entidade <code>tamanho</code> do exercício 02 e descreva-a nos três níveis: em uma
+            frase de negócio (conceitual), como estrutura de tabela com chave (lógico) e como
+            <code>CREATE TABLE</code> do SQL Server, escolhendo tipos (físico).
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <p>
+              <strong>Conceitual:</strong> "A pizzaria vende produtos em tamanhos. Cada tamanho tem um
+              nome, que não se repete, e um número de fatias."
+            </p>
+            <p><strong>Lógico:</strong> relação <code>tamanho</code> com atributos <code>id_tamanho</code> (PK),
+            <code>nm_tamanho</code> (chave alternativa) e <code>qt_fatias</code>.</p>
+            <p><strong>Físico:</strong></p>
+            <sql-terminal banco="BELLAMASSA" titulo="gabarito do exercício 04">
+              <script type="text/plain" slot="sql">CREATE TABLE tamanho (
+    id_tamanho  INT IDENTITY(1,1) NOT NULL,
+    nm_tamanho  VARCHAR(20)       NOT NULL,
+    qt_fatias   TINYINT           NOT NULL,
+    CONSTRAINT PK_tamanho       PRIMARY KEY (id_tamanho),
+    CONSTRAINT UQ_tamanho_nm    UNIQUE (nm_tamanho),
+    CONSTRAINT CK_tamanho_fatia CHECK (qt_fatias BETWEEN 1 AND 24)
+);
+GO</script>
+              <script type="text/plain" slot="saida">Commands completed successfully.</script>
+            </sql-terminal>
+            <p class="mb-0">
+              Repare que só no terceiro degrau apareceram <code>TINYINT</code>,
+              <code>VARCHAR(20)</code> e nomes de constraint. Se esses detalhes aparecerem no primeiro,
+              você pulou degraus.
+            </p>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="desafio" titulo="Que princípio do relacional a planilha viola?">
+          <p>
+            Na planilha da Bella Massa, para saber os pedidos da Helena o atendente precisa lembrar que
+            "os pedidos dela começam na linha 1.204 da aba de março". Qual princípio do modelo
+            relacional está sendo violado, e qual seria a consequência de mudar a ordem das linhas?
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <p>
+              Violado: o <strong>acesso por conteúdo</strong>. No modelo relacional uma tupla é
+              localizada pelo <em>valor</em> dos seus atributos (<code>WHERE id_cliente = 1</code>), e
+              nunca pela posição em que está guardada.
+            </p>
+            <p class="mb-0">
+              Consequência: ordenar a planilha por outra coluna invalida todo conhecimento acumulado
+              sobre "onde as coisas estão". Numa relação isso é irrelevante, porque uma relação é um
+              <strong>conjunto</strong> — não tem ordem. É por isso que, no encontro 16, você vai
+              aprender que um <code>SELECT</code> sem <code>ORDER BY</code> não tem ordem garantida,
+              mesmo quando parece ter.
+            </p>
+          </details>
+        </exercicio-item>
+      </mao-na-massa>
+
+      <section id="erros-comuns" class="uc-erros">
+        <h2>Erros comuns</h2>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Conceito</span>
+            <span class="uc-erro__titulo">Trocar as duas cardinalidades</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              Perguntado sobre a cardinalidade da relação <code>tamanho</code>, o aluno responde "1:N".
+              Misturou dois conceitos: cardinalidade <em>de relação</em> é a contagem de tuplas — aqui,
+              4. A cardinalidade 1:N pertence a um <em>relacionamento</em> entre duas entidades e é
+              assunto do encontro 06.
+            </p>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> antes de responder, veja o que a pergunta tem por sujeito. Se é
+            <em>uma tabela</em>, cardinalidade é um número de linhas. Se são <em>duas tabelas ligadas</em>,
+            é 1:1, 1:N ou N:N.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Conceito</span>
+            <span class="uc-erro__titulo">Achar que uma view guarda dados</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              A visão do atendente parece uma tabela, então o aluno conclui que os dados foram
+              copiados para lá. Não foram: uma <code>VIEW</code> comum é apenas uma consulta guardada
+              com nome. Ela vive no <strong>nível externo</strong> e lê, em tempo real, o nível
+              conceitual.
+            </p>
+            <p class="mb-0">
+              A exceção é a <em>view indexada</em>, que materializa o resultado em disco — e por isso
+              mesmo tem uma lista de restrições, tratada no encontro 21.
+            </p>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> pense na view como uma janela, não como uma gaveta. Se o dado
+            mudar na tabela, a janela mostra o novo valor no próximo <code>SELECT</code>, sem que nada
+            tenha sido copiado.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Msg 208</span>
+            <span class="uc-erro__titulo">Esquecer em qual banco o esquema conceitual vive</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              O nível conceitual pertence a <em>um banco</em>, não à instância inteira. Uma tabela
+              criada em <code>BELLAMASSA</code> não existe no <code>master</code>. Como o
+              <code>sqlcmd</code> e o SSMS abrem conectados ao <code>master</code>, o erro aparece na
+              primeira consulta de todo curso.
+            </p>
+            <sql-terminal variant="erro" banco="master" titulo="a tabela existe, mas não neste banco">
+              <script type="text/plain" slot="sql">SELECT * FROM cliente;
+GO</script>
+              <script type="text/plain" slot="saida">Msg 208, Level 16, State 1, Line 1
+Invalid object name 'cliente'.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> comece todo script com <code>USE BELLAMASSA;</code> seguido de
+            <code>GO</code>, e confirme com <code>SELECT DB_NAME();</code>. Todos os scripts deste site
+            fazem isso na primeira linha, e não por estilo.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Conceito</span>
+            <span class="uc-erro__titulo">Classificar o SELECT como DML</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              Muitos materiais — inclusive a documentação de alguns produtos — colocam o
+              <code>SELECT</code> dentro da DML, já que ele "manipula" dados. Outros o separam em DQL,
+              porque ele é o único comando que não altera nada. As duas classificações circulam, e a
+              divergência já derrubou aluno em prova.
+            </p>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> este curso usa <strong>DQL</strong> para o <code>SELECT</code>,
+            porque a distinção entre ler e escrever é justamente a que importa para permissões (DCL) e
+            transações (TCL). Se a questão não oferecer DQL como alternativa, marque DML e saiba por
+            quê.
+          </div>
+        </article>
+      </section>
+
+      <checklist-aula id="checklist" chave="aula-02">
+        <script type="application/json">
+        [
+          "Explicar por que o modelo hierárquico duplica dados e o relacional não",
+          "Enunciar os princípios do modelo relacional, em especial o acesso por conteúdo",
+          "Traduzir relação, tupla, atributo e domínio para tabela, linha, coluna e tipo",
+          "Dizer o grau e a cardinalidade de uma relação apresentada",
+          "Diferenciar cardinalidade de relação e cardinalidade de relacionamento",
+          "Nomear os três esquemas do ANSI/SPARC e dizer quem usa cada um",
+          "Explicar independência física e independência lógica com um exemplo de cada",
+          "Apresentar a mesma entidade nos modelos conceitual, lógico e físico",
+          "Classificar qualquer comando SQL em DDL, DML, DQL, DCL ou TCL",
+          "Dizer o que guardam os arquivos .mdf e .ldf e por que copiá-los não é backup"
+        ]
+        </script>
+      </checklist-aula>
+
+      <quiz-aula id="quiz" chave="aula-02">
+        <script type="application/json">
+        [
+          {
+            "pergunta": "Qual foi a ruptura central do modelo relacional em relação aos modelos hierárquico e em rede?",
+            "alternativas": [
+              { "texto": "Os registros passaram a se ligar por valor de atributo, e não por ponteiro ou posição física.", "certa": true, "feedback": "Correto. É o acesso por conteúdo: você escreve WHERE id_cliente = 1 e o SGBD encontra a linha, sem que o programa saiba onde ela está gravada." },
+              { "texto": "Os dados passaram a ser guardados em arquivos, e não em memória.", "certa": false, "feedback": "Os modelos anteriores também gravavam em arquivo. A mudança foi na forma de descrever e localizar os dados, não no meio de armazenamento." },
+              { "texto": "Passou a ser possível usar mais de uma tabela no mesmo banco.", "certa": false, "feedback": "Os modelos anteriores já tinham vários tipos de registro. O que faltava era ligá-los por valor em vez de por caminho de acesso." },
+              { "texto": "A linguagem deixou de ser declarativa e passou a ser procedural.", "certa": false, "feedback": "É o oposto: o relacional trouxe a linguagem declarativa. Nos modelos anteriores o programa é que descrevia o caminho de navegação." }
+            ]
+          },
+          {
+            "pergunta": "A relação produto tem 6 colunas e 148 linhas. Qual é o seu grau e qual é a sua cardinalidade?",
+            "alternativas": [
+              { "texto": "Grau 6 e cardinalidade 148.", "certa": true, "feedback": "Correto. Grau é a contagem de atributos, fixada pela estrutura; cardinalidade é a contagem de tuplas e muda a cada INSERT ou DELETE." },
+              { "texto": "Grau 148 e cardinalidade 6.", "certa": false, "feedback": "Invertido. Grau se refere às colunas, que definem a estrutura da relação." },
+              { "texto": "Grau 6 e cardinalidade 1:N.", "certa": false, "feedback": "Confunde as duas cardinalidades da unidade. 1:N descreve um relacionamento entre duas entidades, não uma contagem de linhas." },
+              { "texto": "Não é possível saber sem conhecer a chave primária.", "certa": false, "feedback": "A chave não influencia nenhum dos dois: grau e cardinalidade saem direto da contagem de colunas e de linhas." }
+            ]
+          },
+          {
+            "pergunta": "O DBA move os arquivos do banco para um disco mais rápido e nenhuma consulta precisa ser reescrita. Que propriedade da arquitetura ANSI/SPARC está em ação?",
+            "alternativas": [
+              { "texto": "Independência física: mudanças no nível interno não afetam o conceitual nem o externo.", "certa": true, "feedback": "Correto. Foi para permitir exatamente isso que o modelo relacional separou a descrição lógica do armazenamento." },
+              { "texto": "Independência lógica: mudanças no nível conceitual não afetam as visões.", "certa": false, "feedback": "Independência lógica é sobre mexer nas tabelas, como acrescentar uma coluna. Mover arquivo é nível interno." },
+              { "texto": "Integridade referencial, que garante a validade das chaves estrangeiras.", "certa": false, "feedback": "Integridade referencial trata de valores de chave, não de localização de arquivos. É assunto do encontro 10." },
+              { "texto": "Atomicidade, que impede uma transação de terminar pela metade.", "certa": false, "feedback": "Atomicidade é propriedade de transação (o A de ACID) e nada tem a ver com onde os arquivos estão." }
+            ]
+          },
+          {
+            "pergunta": "Em qual nível de modelagem aparecem pela primeira vez decisões como VARCHAR(120), IDENTITY e o nome PK_cliente?",
+            "alternativas": [
+              { "texto": "No modelo físico, porque só ele compromete o projeto com um SGBD específico.", "certa": true, "feedback": "Correto. Conceitual fala a língua do negócio; lógico decide tabelas e chaves; físico escolhe tipos, tamanhos e recursos do produto — aqui, do SQL Server." },
+              { "texto": "No modelo conceitual, para que o cliente aprove os tipos de dados.", "certa": false, "feedback": "O cliente não decide se o nome cabe em 120 caracteres. O conceitual descreve entidades e atributos em linguagem de negócio." },
+              { "texto": "No modelo lógico, que já é escrito em T-SQL.", "certa": false, "feedback": "O lógico define relações, chaves primárias e estrangeiras, mas ainda é independente de produto — ele não é escrito em T-SQL." },
+              { "texto": "Em nenhum: tipos de dados não fazem parte da modelagem.", "certa": false, "feedback": "Fazem, e no degrau físico. Escolher FLOAT para dinheiro, por exemplo, é um erro de modelagem física com consequência contábil." }
+            ]
+          },
+          {
+            "pergunta": "GRANT SELECT ON dbo.pagamento TO app_bellamassa; pertence a qual sublinguagem?",
+            "alternativas": [
+              { "texto": "DCL — controla quem pode fazer o quê.", "certa": true, "feedback": "Correto. GRANT, REVOKE e DENY formam a DCL, trabalhada no encontro 24 junto com o princípio do menor privilégio." },
+              { "texto": "DDL — porque altera um objeto do banco.", "certa": false, "feedback": "A permissão é um metadado sobre o objeto, mas a estrutura da tabela pagamento não muda. DDL é CREATE, ALTER, DROP e TRUNCATE." },
+              { "texto": "DQL — porque contém a palavra SELECT.", "certa": false, "feedback": "A palavra SELECT aqui nomeia a permissão concedida; nenhuma linha é lida. Classifique pelo verbo principal do comando, que é GRANT." },
+              { "texto": "TCL — porque precisa de COMMIT para valer.", "certa": false, "feedback": "TCL são os comandos que delimitam transações: BEGIN TRAN, COMMIT e ROLLBACK. O GRANT tem efeito imediato." }
+            ]
+          }
+        ]
+        </script>
+      </quiz-aula>
+
+      <div id="app-script"></div>
+    </article>
+
+    <div id="app-prevnext"></div>
+  </main>
+
+  <div id="app-rodape"></div>
+</div>
+
+<script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 06 · Relacionamentos e cardinalidade · UC10 Banco de dados</title>
+<meta name="description" content="Grau do relacionamento, cardinalidade máxima 1:1, 1:N e N:N, cardinalidade mínima e participação total, auto-relacionamento e dois modelos errados, em notação de Chen e pé-de-galinha.">
+<script>try{var t=JSON.parse(localStorage.getItem('uc10:tema'));if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/terminal.css">
+<link rel="stylesheet" href="../assets/css/didatico.css">
+<script defer src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</head>
+<body data-pagina="aula">
+
+<a class="uc-skip" href="#conteudo">Pular para o conteúdo</a>
+<header id="app-navbar"></header>
+<aside id="app-sidebar"></aside>
+
+<div class="uc-conteudo">
+  <main id="conteudo" class="container-xxl px-3 px-lg-4 py-4">
+
+    <div id="app-breadcrumb"></div>
+    <div id="app-cabecalho"></div>
+
+    <article>
+
+      <section id="objetivos">
+        <h2 class="visually-hidden">Objetivos de aprendizagem</h2>
+        <div class="uc-objetivos">
+          <p class="mb-1"><strong>Ao fim desta aula você será capaz de:</strong></p>
+          <ul class="mb-0">
+            <li>Classificar um relacionamento pelo grau: unário, binário ou ternário.</li>
+            <li>Determinar a cardinalidade máxima entre duas entidades e justificar por que é 1:1, 1:N ou N:N.</li>
+            <li>Determinar a cardinalidade mínima e dizer se a participação de cada lado é total ou parcial.</li>
+            <li>Ler qualquer relacionamento em voz alta nos dois sentidos, e usar essa leitura para validar o modelo com o cliente.</li>
+            <li>Modelar um auto-relacionamento e reconhecer dois erros clássicos de cardinalidade antes que virem tabela.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="problematizacao">
+        <h2>Problematização</h2>
+        <p>
+          Na entrevista da aula 04, a gestora da Bella Massa disse quatro frases que parecem óbvias e
+          decidem a estrutura inteira do banco: <em>"cada pedido é de um cliente só"</em>,
+          <em>"um pedido leva várias pizzas e a mesma pizza sai em vários pedidos"</em>,
+          <em>"pedido de delivery tem uma entrega, pedido de salão não tem nenhuma"</em> e
+          <em>"todo entregador responde a um supervisor, que também é funcionário"</em>.
+        </p>
+        <p>
+          Cada uma dessas frases é uma cardinalidade. Errar uma delas não gera erro de sintaxe: gera
+          um banco que aceita dados impossíveis, ou que recusa dados legítimos. Esta aula é sobre
+          transformar frase de cliente em cardinalidade defensável.
+        </p>
+      </section>
+
+      <section id="grau">
+        <h2>Grau do relacionamento</h2>
+        <p>
+          O <strong>grau</strong> é a quantidade de entidades que participam do relacionamento. Quase
+          tudo que você vai modelar é binário; os outros dois casos aparecem pouco, mas quando
+          aparecem costumam ser modelados errado.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Grau</th>
+                <th scope="col">Entidades envolvidas</th>
+                <th scope="col">Na Bella Massa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Unário</strong> (ou recursivo)</td>
+                <td>Uma só, relacionada com ela mesma</td>
+                <td><code>funcionario</code> supervisiona <code>funcionario</code></td>
+              </tr>
+              <tr>
+                <td><strong>Binário</strong></td>
+                <td>Duas</td>
+                <td><code>cliente</code> faz <code>pedido</code></td>
+              </tr>
+              <tr>
+                <td><strong>Ternário</strong></td>
+                <td>Três ao mesmo tempo</td>
+                <td><code>produto</code> + <code>tamanho</code> + <code>promocao</code> definem um preço</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <chen-diagram legenda="Relacionamento unário: funcionário supervisiona funcionário." viewbox="0 0 900 280">
+          <script type="application/json">
+          {
+            "larguraMax": 760,
+            "descricao": "Um retângulo chamado FUNCIONARIO na parte de baixo. Dele saem duas linhas que sobem, uma pela esquerda e outra pela direita, e chegam a um losango chamado SUPERVISIONA na parte de cima. A linha da esquerda leva a cardinalidade 1, correspondente ao papel de supervisor; a da direita leva N, correspondente ao papel de supervisionado.",
+            "formas": [
+              { "tipo": "linha", "pontos": [[350,190],[280,190],[280,70],[375,70]], "card": "1", "cardXY": [258,130] },
+              { "tipo": "linha", "pontos": [[550,190],[620,190],[620,70],[525,70]], "card": "N", "cardXY": [642,130] },
+              { "tipo": "entidade", "x": 450, "y": 190, "w": 200, "rotulo": "FUNCIONARIO" },
+              { "tipo": "relacionamento", "x": 450, "y": 70, "rotulo": "SUPERVISIONA" },
+              { "tipo": "texto", "x": 280, "y": 222, "rotulo": "papel: supervisor" },
+              { "tipo": "texto", "x": 620, "y": 222, "rotulo": "papel: supervisionado" }
+            ]
+          }
+          </script>
+        </chen-diagram>
+
+        <div class="uc-alerta uc-alerta--conceito">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-tag"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Papel</span>
+            <p class="mb-0">
+              No relacionamento unário a mesma entidade aparece duas vezes, então o nome dela não
+              basta para saber de que lado você está falando. Por isso cada ponta ganha um
+              <strong>papel</strong>: supervisor e supervisionado. Sem os papéis, o diagrama fica
+              ambíguo e vira uma tabela com coluna de nome inventado.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="cardinalidade-maxima">
+        <h2>Cardinalidade máxima: 1:1, 1:N e N:N</h2>
+        <p>
+          A cardinalidade máxima responde: <em>no máximo, quantas ocorrências de B podem se
+          relacionar com uma ocorrência de A?</em> São só três respostas possíveis, e cada uma vira
+          uma estrutura de tabela diferente.
+        </p>
+
+        <h3>1:N — um cliente faz muitos pedidos</h3>
+        <p>
+          O caso mais comum. O lado "muitos" é quem recebe a chave estrangeira. É esta decisão, e não
+          o desenho, que resolve o relacionamento no banco relacional.
+        </p>
+
+        <div class="uc-lado-a-lado">
+          <div>
+            <h4>1. Em linguagem natural</h4>
+            <p class="small mb-0">
+              "Cada pedido pertence a exatamente um cliente. Um cliente pode ter feito nenhum, um ou
+              muitos pedidos ao longo do tempo."
+            </p>
+          </div>
+          <div>
+            <h4>2. Em notação de Chen</h4>
+            <chen-diagram legenda="1:N entre cliente e pedido." viewbox="0 0 900 220">
+              <script type="application/json">
+              {
+                "larguraMax": 700,
+                "descricao": "Retângulo CLIENTE à esquerda, losango FAZ no centro e retângulo PEDIDO à direita, ligados por linhas horizontais. A linha entre CLIENTE e FAZ tem cardinalidade 1; a linha entre FAZ e PEDIDO tem cardinalidade N.",
+                "formas": [
+                  { "tipo": "linha", "de": [240,110], "para": [375,110], "card": "1", "cardXY": [307,88] },
+                  { "tipo": "linha", "de": [525,110], "para": [660,110], "card": "N", "cardXY": [592,88] },
+                  { "tipo": "entidade", "x": 150, "y": 110, "w": 180, "rotulo": "CLIENTE" },
+                  { "tipo": "relacionamento", "x": 450, "y": 110, "rotulo": "FAZ" },
+                  { "tipo": "entidade", "x": 750, "y": 110, "w": 180, "rotulo": "PEDIDO" }
+                ]
+              }
+              </script>
+            </chen-diagram>
+          </div>
+          <div>
+            <h4>3. Como fica no relacional</h4>
+            <p class="small mb-0">
+              Duas tabelas. <code>pedido</code> ganha a coluna <code>id_cliente</code> como chave
+              estrangeira. <code>cliente</code> não ganha nada — é o lado "um".
+            </p>
+          </div>
+        </div>
+
+        <er-diagram
+          legenda="O mesmo 1:N em notação pé-de-galinha, com as colunas já decididas."
+          descricao="CLIENTE liga-se a PEDIDO com o símbolo de um para muitos: barra dupla do lado de CLIENTE e pé-de-galinha com círculo do lado de PEDIDO. CLIENTE tem id_cliente como chave primária e nm_cliente. PEDIDO tem id_pedido como chave primária, id_cliente como chave estrangeira e dt_pedido.">
+          <script type="text/plain">
+erDiagram
+    CLIENTE ||--o{ PEDIDO : "faz"
+    CLIENTE {
+        int id_cliente PK
+        varchar nm_cliente
+    }
+    PEDIDO {
+        int id_pedido PK
+        int id_cliente FK
+        datetime2 dt_pedido
+    }
+          </script>
+        </er-diagram>
+
+        <p>
+          Traduzido para T-SQL, o 1:N é exatamente uma chave estrangeira na tabela do lado "muitos":
+        </p>
+
+        <sql-terminal banco="MODELAGEM" titulo="1:N — a FK mora no lado muitos">
+          <script type="text/plain" slot="sql">CREATE TABLE cliente (
+    id_cliente  INT IDENTITY(1,1) NOT NULL,
+    nm_cliente  VARCHAR(120)      NOT NULL,
+    CONSTRAINT PK_cliente PRIMARY KEY (id_cliente)
+);
+
+CREATE TABLE pedido (
+    id_pedido   INT IDENTITY(1,1) NOT NULL,
+    id_cliente  INT               NOT NULL,
+    dt_pedido   DATETIME2(0)      NOT NULL
+        CONSTRAINT DF_pedido_dt_pedido DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_pedido        PRIMARY KEY (id_pedido),
+    CONSTRAINT FK_pedido_cliente FOREIGN KEY (id_cliente)
+        REFERENCES cliente (id_cliente)
+);
+GO</script>
+          <script type="text/plain" slot="saida">Commands completed successfully.</script>
+        </sql-terminal>
+
+        <h3>N:N — um pedido leva muitos produtos, um produto sai em muitos pedidos</h3>
+        <p>
+          Aqui os dois lados são "muitos". O banco relacional <strong>não sabe</strong> representar
+          isso com duas tabelas: não existe onde colocar a chave estrangeira sem repetir linha. A
+          solução é uma terceira tabela, chamada de associativa.
+        </p>
+
+        <chen-diagram legenda="N:N entre pedido e produto, com atributo próprio do relacionamento." viewbox="0 0 900 300">
+          <script type="application/json">
+          {
+            "larguraMax": 760,
+            "descricao": "Retângulo PEDIDO à esquerda, losango CONTEM ao centro e retângulo PRODUTO à direita. Ambas as linhas têm cardinalidade N. Acima do losango, ligada a ele por uma linha vertical, há uma elipse chamada qt_item: a quantidade não pertence ao pedido nem ao produto, e sim ao encontro dos dois.",
+            "formas": [
+              { "tipo": "linha", "de": [240,190], "para": [375,190], "card": "N", "cardXY": [307,168] },
+              { "tipo": "linha", "de": [525,190], "para": [660,190], "card": "N", "cardXY": [592,168] },
+              { "tipo": "linha", "de": [450,152], "para": [450,95] },
+              { "tipo": "entidade", "x": 150, "y": 190, "w": 180, "rotulo": "PEDIDO" },
+              { "tipo": "relacionamento", "x": 450, "y": 190, "rotulo": "CONTEM" },
+              { "tipo": "entidade", "x": 750, "y": 190, "w": 180, "rotulo": "PRODUTO" },
+              { "tipo": "atributo", "x": 450, "y": 70, "rotulo": "qt_item" }
+            ]
+          }
+          </script>
+        </chen-diagram>
+
+        <p>
+          No modelo lógico o losango vira tabela. Repare que o pé-de-galinha mostra o que o Chen
+          escondia: <code>ITEM_PEDIDO</code> tem chave primária composta e duas chaves estrangeiras.
+        </p>
+
+        <er-diagram
+          legenda="O N:N resolvido pela tabela associativa item_pedido."
+          descricao="PEDIDO liga-se a ITEM_PEDIDO como um para muitos obrigatório, e PRODUTO liga-se a ITEM_PEDIDO também como um para muitos obrigatório. ITEM_PEDIDO tem id_pedido e id_produto formando a chave primária composta, além de qt_item e vl_unitario.">
+          <script type="text/plain">
+erDiagram
+    PEDIDO  ||--|{ ITEM_PEDIDO : "detalha"
+    PRODUTO ||--|{ ITEM_PEDIDO : "aparece em"
+    PEDIDO {
+        int id_pedido PK
+        int id_cliente FK
+    }
+    ITEM_PEDIDO {
+        int id_pedido PK,FK
+        int id_produto PK,FK
+        smallint qt_item
+        decimal vl_unitario
+    }
+    PRODUTO {
+        int id_produto PK
+        varchar nm_produto
+    }
+          </script>
+        </er-diagram>
+
+        <sql-terminal banco="MODELAGEM" titulo="N:N — a tabela associativa">
+          <script type="text/plain" slot="sql">CREATE TABLE produto (
+    id_produto  INT IDENTITY(1,1) NOT NULL,
+    nm_produto  VARCHAR(80)       NOT NULL,
+    CONSTRAINT PK_produto PRIMARY KEY (id_produto)
+);
+
+CREATE TABLE item_pedido (
+    id_pedido    INT          NOT NULL,
+    id_produto   INT          NOT NULL,
+    qt_item      SMALLINT     NOT NULL,
+    vl_unitario  DECIMAL(8,2) NOT NULL,
+    CONSTRAINT PK_item_pedido PRIMARY KEY (id_pedido, id_produto),
+    CONSTRAINT FK_item_pedido_pedido  FOREIGN KEY (id_pedido)
+        REFERENCES pedido (id_pedido),
+    CONSTRAINT FK_item_pedido_produto FOREIGN KEY (id_produto)
+        REFERENCES produto (id_produto),
+    CONSTRAINT CK_item_pedido_qt CHECK (qt_item > 0)
+);
+GO</script>
+          <script type="text/plain" slot="saida">Commands completed successfully.</script>
+        </sql-terminal>
+
+        <div class="uc-alerta uc-alerta--info">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-key"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Por que a chave primária é composta</span>
+            <p class="mb-0">
+              <code>PRIMARY KEY (id_pedido, id_produto)</code> diz que o mesmo produto não pode
+              aparecer duas vezes no mesmo pedido — se o cliente quer duas calabresas, isso é
+              <code>qt_item = 2</code>, não duas linhas. Essa é uma regra de negócio inteira escrita
+              em uma linha de DDL.
+            </p>
+          </div>
+        </div>
+
+        <h3>1:1 — um pedido de delivery tem uma entrega</h3>
+        <p>
+          O 1:1 é o mais raro e o mais suspeito: quando ele aparece, a primeira pergunta é se as duas
+          entidades não deveriam ser uma só. Ele se justifica quando um dos lados é opcional, como
+          aqui: pedido de salão não tem entrega nenhuma.
+        </p>
+
+        <chen-diagram legenda="1:1 entre pedido e entrega, com participação parcial de um lado e total do outro." viewbox="0 0 900 230">
+          <script type="application/json">
+          {
+            "larguraMax": 720,
+            "descricao": "Retângulo PEDIDO à esquerda ligado por linha simples ao losango POSSUI, com cardinalidade 1. Do losango sai uma linha dupla até o retângulo ENTREGA, também com cardinalidade 1. A linha simples indica participação parcial do pedido, que pode não ter entrega; a linha dupla indica participação total da entrega, que não existe sem pedido.",
+            "formas": [
+              { "tipo": "linha", "de": [245,115], "para": [372,115], "card": "1", "cardXY": [308,93] },
+              { "tipo": "linha", "de": [528,115], "para": [655,115], "card": "1", "cardXY": [592,93], "total": true },
+              { "tipo": "entidade", "x": 150, "y": 115, "w": 190, "rotulo": "PEDIDO" },
+              { "tipo": "relacionamento", "x": 450, "y": 115, "rotulo": "POSSUI" },
+              { "tipo": "entidade", "x": 750, "y": 115, "w": 190, "rotulo": "ENTREGA" },
+              { "tipo": "texto", "x": 150, "y": 165, "rotulo": "participacao parcial" },
+              { "tipo": "texto", "x": 750, "y": 165, "rotulo": "participacao total" }
+            ]
+          }
+          </script>
+        </chen-diagram>
+
+        <p>
+          No relacional, o 1:1 vira chave estrangeira <em>com restrição de unicidade</em> no lado que
+          participa por inteiro. Aqui, a própria chave primária de <code>entrega</code> é a chave
+          estrangeira para <code>pedido</code> — o que já garante um para um:
+        </p>
+
+        <sql-terminal banco="MODELAGEM" titulo="1:1 — PK que também é FK">
+          <script type="text/plain" slot="sql">CREATE TABLE entrega (
+    id_pedido     INT          NOT NULL,
+    nm_entregador VARCHAR(120) NOT NULL,
+    dt_saida      DATETIME2(0) NULL,
+    CONSTRAINT PK_entrega        PRIMARY KEY (id_pedido),
+    CONSTRAINT FK_entrega_pedido FOREIGN KEY (id_pedido)
+        REFERENCES pedido (id_pedido)
+);
+GO</script>
+          <script type="text/plain" slot="saida">Commands completed successfully.</script>
+        </sql-terminal>
+
+        <sql-terminal variant="erro" banco="MODELAGEM" titulo="o 1:1 sendo cobrado pelo banco">
+          <script type="text/plain" slot="sql">INSERT INTO entrega (id_pedido, nm_entregador)
+VALUES (1, 'Douglas Ramos');
+
+INSERT INTO entrega (id_pedido, nm_entregador)
+VALUES (1, 'Marina Alves');
+GO</script>
+          <script type="text/plain" slot="saida">(1 row affected)
+Msg 2627, Level 14, State 1, Line 4
+Violation of PRIMARY KEY constraint 'PK_entrega'. Cannot insert duplicate key in object 'dbo.entrega'. The duplicate key value is (1).
+The statement has been terminated.</script>
+        </sql-terminal>
+      </section>
+
+      <section id="cardinalidade-minima">
+        <h2>Cardinalidade mínima e participação</h2>
+        <p>
+          A cardinalidade máxima diz quantos <em>podem</em>; a mínima diz quantos <em>precisam</em>.
+          É a diferença entre "pode não ter" e "tem que ter", e no T-SQL ela vira uma coisa só:
+          <code>NULL</code> ou <code>NOT NULL</code> na coluna da chave estrangeira.
+        </p>
+
+        <div class="uc-tabela-wrap">
+          <table class="table table-sm uc-dados mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Participação</th>
+                <th scope="col">Cardinalidade (mín, máx)</th>
+                <th scope="col">Chen</th>
+                <th scope="col">Pé-de-galinha</th>
+                <th scope="col">No T-SQL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Total</strong> (obrigatória)</td>
+                <td><code>(1,1)</code> ou <code>(1,N)</code></td>
+                <td>Linha dupla</td>
+                <td>Barra <code>|</code> junto à entidade</td>
+                <td>FK <code>NOT NULL</code></td>
+              </tr>
+              <tr>
+                <td><strong>Parcial</strong> (opcional)</td>
+                <td><code>(0,1)</code> ou <code>(0,N)</code></td>
+                <td>Linha simples</td>
+                <td>Círculo <code>o</code> junto à entidade</td>
+                <td>FK aceitando <code>NULL</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          Na Bella Massa: todo pedido tem cliente — participação total, <code>id_cliente NOT
+          NULL</code>. Mas nem todo pedido tem mesa, porque delivery não usa mesa — participação
+          parcial, <code>id_mesa NULL</code>. As duas colunas vivem na mesma tabela e têm nulidade
+          diferente exatamente por isso:
+        </p>
+
+        <sql-terminal banco="MODELAGEM" titulo="a cardinalidade mínima virando NULL e NOT NULL">
+          <script type="text/plain" slot="sql">CREATE TABLE mesa (
+    id_mesa   INT      NOT NULL,
+    nr_lugares TINYINT NOT NULL,
+    CONSTRAINT PK_mesa PRIMARY KEY (id_mesa)
+);
+
+ALTER TABLE pedido
+    ADD id_mesa INT NULL
+        CONSTRAINT FK_pedido_mesa FOREIGN KEY REFERENCES mesa (id_mesa);
+GO
+
+INSERT INTO mesa (id_mesa, nr_lugares) VALUES (7, 4);
+INSERT INTO cliente (nm_cliente) VALUES ('Helena Duarte'), ('Rafael Nunes');
+GO
+
+-- pedido de salao: tem mesa
+INSERT INTO pedido (id_cliente, id_mesa) VALUES (1, 7);
+-- pedido de delivery: nao tem mesa, e isso e legitimo
+INSERT INTO pedido (id_cliente, id_mesa) VALUES (2, NULL);
+GO</script>
+          <script type="text/plain" slot="saida">(1 row affected)
+(2 rows affected)
+(1 row affected)
+(1 row affected)</script>
+        </sql-terminal>
+
+        <result-set legenda="SELECT id_pedido, id_cliente, id_mesa FROM pedido;">
+          <script type="application/json">
+          {
+            "colunas": [
+              { "nome": "id_pedido", "tipo": "num" },
+              { "nome": "id_cliente", "tipo": "num" },
+              { "nome": "id_mesa", "tipo": "num" }
+            ],
+            "linhas": [[1, 1, 7], [2, 2, null]],
+            "afetadas": 2
+          }
+          </script>
+        </result-set>
+
+        <p>
+          O <code>NULL</code> em <code>id_mesa</code> não é dado faltando: é a resposta correta para
+          "qual mesa deste delivery?". Já um <code>NULL</code> em <code>id_cliente</code> seria um
+          pedido órfão, e é isso que o <code>NOT NULL</code> impede.
+        </p>
+
+        <sql-terminal variant="erro" banco="MODELAGEM" titulo="tentando quebrar a participação total">
+          <script type="text/plain" slot="sql">INSERT INTO pedido (id_cliente, id_mesa) VALUES (NULL, 7);
+GO</script>
+          <script type="text/plain" slot="saida">Msg 515, Level 16, State 2, Line 1
+Cannot insert the value NULL into column 'id_cliente', table 'MODELAGEM_UC10.dbo.pedido'; column does not allow nulls. INSERT fails.
+The statement has been terminated.</script>
+        </sql-terminal>
+      </section>
+
+      <section id="leitura-dupla">
+        <h2>Lendo o relacionamento nos dois sentidos</h2>
+        <p>
+          Este é o teste mais barato de validação de modelo que existe: leia a ligação em voz alta,
+          nos dois sentidos, e mostre para quem entende do negócio. Se a gestora hesitar, o modelo
+          está errado — não o entendimento dela.
+        </p>
+
+        <div class="uc-leitura">
+          <p><b>cliente → pedido:</b> um cliente faz <em>zero ou muitos</em> pedidos.</p>
+          <p><b>pedido → cliente:</b> um pedido é feito por <em>exatamente um</em> cliente.</p>
+        </div>
+
+        <div class="uc-leitura">
+          <p><b>pedido → produto:</b> um pedido contém <em>um ou muitos</em> produtos.</p>
+          <p><b>produto → pedido:</b> um produto pode aparecer em <em>zero ou muitos</em> pedidos.</p>
+        </div>
+
+        <div class="uc-leitura">
+          <p><b>pedido → entrega:</b> um pedido possui <em>zero ou uma</em> entrega.</p>
+          <p><b>entrega → pedido:</b> uma entrega pertence a <em>exatamente um</em> pedido.</p>
+        </div>
+
+        <div class="uc-leitura">
+          <p><b>funcionário → funcionário:</b> um funcionário supervisiona <em>zero ou muitos</em> funcionários.</p>
+          <p><b>funcionário → funcionário:</b> um funcionário é supervisionado por <em>zero ou um</em> funcionário — zero no caso do dono.</p>
+        </div>
+
+        <div class="uc-alerta uc-alerta--sucesso">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-chat-quote"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Fórmula da leitura</span>
+            <p class="mb-0">
+              <em>"Um(a) <strong>A</strong> [verbo do relacionamento] <strong>mínimo</strong> ou
+              <strong>máximo</strong> <strong>B</strong>."</em> Troque mínimo e máximo por: zero ou
+              muitos, um ou muitos, zero ou um, exatamente um. Se nenhuma das quatro formas couber na
+              frase, você ainda não entendeu a regra de negócio.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="auto-relacionamento">
+        <h2>Auto-relacionamento</h2>
+        <p>
+          O entregador responde a um supervisor, que é funcionário da mesma tabela. Isso vira uma
+          chave estrangeira que aponta para a própria tabela, com nulidade opcional — porque alguém,
+          no topo, não tem supervisor.
+        </p>
+
+        <er-diagram
+          legenda="Auto-relacionamento em pé-de-galinha: a linha sai de FUNCIONARIO e volta para FUNCIONARIO."
+          descricao="A entidade FUNCIONARIO relaciona-se consigo mesma como um para muitos opcional. Ela tem id_funcionario como chave primária, nm_funcionario, ds_cargo e id_supervisor como chave estrangeira que aponta para id_funcionario da própria tabela.">
+          <script type="text/plain">
+erDiagram
+    FUNCIONARIO ||--o{ FUNCIONARIO : "supervisiona"
+    FUNCIONARIO {
+        int id_funcionario PK
+        varchar nm_funcionario
+        varchar ds_cargo
+        int id_supervisor FK
+    }
+          </script>
+        </er-diagram>
+
+        <sql-terminal banco="MODELAGEM" titulo="a FK que aponta para a própria tabela">
+          <script type="text/plain" slot="sql">CREATE TABLE funcionario (
+    id_funcionario  INT IDENTITY(1,1) NOT NULL,
+    nm_funcionario  VARCHAR(120)      NOT NULL,
+    ds_cargo        VARCHAR(40)       NOT NULL,
+    id_supervisor   INT               NULL,
+    CONSTRAINT PK_funcionario            PRIMARY KEY (id_funcionario),
+    CONSTRAINT FK_funcionario_supervisor FOREIGN KEY (id_supervisor)
+        REFERENCES funcionario (id_funcionario)
+);
+GO
+
+INSERT INTO funcionario (nm_funcionario, ds_cargo, id_supervisor)
+VALUES ('Cleide Barros', 'Gerente', NULL);
+
+INSERT INTO funcionario (nm_funcionario, ds_cargo, id_supervisor)
+VALUES ('Douglas Ramos', 'Entregador', 1),
+       ('Marina Alves',  'Entregador', 1),
+       ('Tiago Peixoto', 'Pizzaiolo',  1);
+GO</script>
+          <script type="text/plain" slot="saida">(1 row affected)
+(3 rows affected)</script>
+        </sql-terminal>
+
+        <p>
+          Para ler a hierarquia, a tabela é usada duas vezes na mesma consulta, com apelidos
+          diferentes — é o <code>SELF JOIN</code>, que a aula 19 trata a fundo. O
+          <code>LEFT JOIN</code> aqui existe justamente por causa da cardinalidade mínima zero: sem
+          ele, a gerente sumiria do resultado.
+        </p>
+
+        <sql-terminal banco="MODELAGEM" titulo="lendo a hierarquia">
+          <script type="text/plain" slot="sql">SELECT f.nm_funcionario AS funcionario,
+       f.ds_cargo,
+       s.nm_funcionario AS supervisor
+  FROM funcionario AS f
+  LEFT JOIN funcionario AS s
+         ON s.id_funcionario = f.id_supervisor
+ ORDER BY f.id_funcionario;
+GO</script>
+          <script type="text/plain" slot="saida">funcionario     ds_cargo    supervisor
+--------------- ----------- ---------------
+Cleide Barros   Gerente     NULL
+Douglas Ramos   Entregador  Cleide Barros
+Marina Alves    Entregador  Cleide Barros
+Tiago Peixoto   Pizzaiolo   Cleide Barros
+
+(4 rows affected)</script>
+        </sql-terminal>
+      </section>
+
+      <section id="modelos-errados">
+        <h2>Dois modelos errados</h2>
+        <p>
+          Os dois erros abaixo passam na banca de "está bonito no diagrama" e explodem na primeira
+          semana de uso. Reconheça os dois de olhos fechados.
+        </p>
+
+        <h3>Erro 1: N:N sem tabela associativa</h3>
+        <p>
+          A tentação é colocar <code>id_produto</code> dentro de <code>pedido</code>. Funciona
+          enquanto todo pedido tiver exatamente um produto — ou seja, nunca.
+        </p>
+
+        <div class="uc-lado-a-lado">
+          <div class="uc-errado">
+            <span class="uc-tag-modelo">modelo errado</span>
+            <h4>FK direta entre as duas tabelas</h4>
+            <sql-terminal variant="erro" banco="MODELAGEM" titulo="o N:N que não cabe">
+              <script type="text/plain" slot="sql">-- pedido com uma unica coluna id_produto
+ALTER TABLE pedido ADD id_produto INT NULL;
+GO
+
+-- e agora, o pedido 1 que tem calabresa, refrigerante e borda recheada?
+-- so cabe um. As alternativas sao todas ruins:
+--   a) repetir a linha do pedido para cada produto
+--      -> o mesmo pedido passa a ter tres id_pedido diferentes
+--   b) guardar '1,2,3' em uma coluna de texto
+--      -> nao da para fazer JOIN, nem SUM, nem CHECK
+GO</script>
+              <script type="text/plain" slot="saida">Commands completed successfully.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-certo">
+            <span class="uc-tag-modelo">modelo correto</span>
+            <h4>Tabela associativa item_pedido</h4>
+            <p class="small">
+              Cada linha de <code>item_pedido</code> é um produto dentro de um pedido, com a
+              quantidade e o preço praticado <em>naquele dia</em>. Um pedido pode ter quantos itens
+              precisar e o produto continua único no catálogo.
+            </p>
+            <result-set legenda="SELECT * FROM item_pedido;">
+              <script type="application/json">
+              {
+                "colunas": [
+                  { "nome": "id_pedido", "tipo": "num" },
+                  { "nome": "id_produto", "tipo": "num" },
+                  { "nome": "qt_item", "tipo": "num" },
+                  { "nome": "vl_unitario", "tipo": "num" }
+                ],
+                "linhas": [[1, 1, 2, "54.90"], [1, 2, 1, "8.00"], [2, 1, 1, "54.90"]],
+                "afetadas": 3
+              }
+              </script>
+            </result-set>
+          </div>
+        </div>
+
+        <div class="uc-alerta uc-alerta--atencao">
+          <div class="uc-alerta__icone" aria-hidden="true"><i class="bi bi-exclamation-diamond"></i></div>
+          <div class="uc-alerta__corpo">
+            <span class="uc-alerta__titulo">Regra prática</span>
+            <p class="mb-0">
+              Todo N:N vira <strong>três</strong> tabelas. Sempre. Se o seu diagrama tem um N:N e o
+              seu script tem duas tabelas, falta uma — e é justamente nela que moram os atributos do
+              relacionamento, como <code>qt_item</code> e <code>vl_unitario</code>.
+            </p>
+          </div>
+        </div>
+
+        <h3>Erro 2: atributo multivalorado dentro da tabela</h3>
+        <p>
+          A gestora disse que o cliente tem "o telefone fixo, o celular e às vezes o do trabalho".
+          A tradução preguiçosa disso é criar três colunas.
+        </p>
+
+        <div class="uc-lado-a-lado">
+          <div class="uc-errado">
+            <span class="uc-tag-modelo">modelo errado</span>
+            <h4>telefone1, telefone2, telefone3</h4>
+            <result-set legenda="A tabela cliente com telefones em colunas repetidas">
+              <script type="application/json">
+              {
+                "colunas": [
+                  { "nome": "id_cliente", "tipo": "num" },
+                  { "nome": "nm_cliente", "tipo": "texto", "largura": 15 },
+                  { "nome": "telefone1", "tipo": "texto", "largura": 15 },
+                  { "nome": "telefone2", "tipo": "texto", "largura": 15 },
+                  { "nome": "telefone3", "tipo": "texto", "largura": 15 }
+                ],
+                "linhas": [
+                  [1, "Helena Duarte", "(11) 3555-1020", null, null],
+                  [2, "Rafael Nunes", "(11) 3555-7788", "(11) 98877-1122", null],
+                  [3, "Vitor Camargo", "(11) 99444-3311", "(11) 3555-9090", "(11) 3555-4004"]
+                ],
+                "afetadas": 3
+              }
+              </script>
+            </result-set>
+            <p class="small mb-0">
+              Três problemas de uma vez: colunas quase sempre nulas, o quarto telefone exige
+              <code>ALTER TABLE</code>, e procurar um número obriga a escrever
+              <code>WHERE telefone1 = ... OR telefone2 = ... OR telefone3 = ...</code>.
+            </p>
+          </div>
+          <div class="uc-certo">
+            <span class="uc-tag-modelo">modelo correto</span>
+            <h4>1:N para telefone_cliente</h4>
+            <p class="small">
+              O atributo multivalorado vira uma entidade própria, com participação parcial: o cliente
+              pode ter zero telefones e pode ter dez.
+            </p>
+            <result-set legenda="SELECT * FROM telefone_cliente;">
+              <script type="application/json">
+              {
+                "colunas": [
+                  { "nome": "id_telefone", "tipo": "num" },
+                  { "nome": "id_cliente", "tipo": "num" },
+                  { "nome": "nr_telefone", "tipo": "texto", "largura": 16 },
+                  { "nome": "ds_tipo", "tipo": "texto", "largura": 10 }
+                ],
+                "linhas": [
+                  [1, 1, "(11) 3555-1020", "fixo"],
+                  [2, 2, "(11) 3555-7788", "fixo"],
+                  [3, 2, "(11) 98877-1122", "celular"],
+                  [4, 3, "(11) 99444-3311", "celular"]
+                ],
+                "afetadas": 4
+              }
+              </script>
+            </result-set>
+          </div>
+        </div>
+
+        <p>
+          A leitura nos dois sentidos confirma a decisão: <em>um cliente tem zero ou muitos
+          telefones; um telefone pertence a exatamente um cliente</em>. É 1:N, com participação
+          parcial do lado do cliente e total do lado do telefone. A aula 09 formaliza essa
+          transformação como a Regra 5 do mapeamento.
+        </p>
+      </section>
+
+      <mao-na-massa id="mao-na-massa" sub="Use o banco MODELAGEM_UC10 criado pelo script desta aula. Responda antes de abrir o gabarito.">
+        <exercicio-item nivel="aquecimento" titulo="Classifique quatro frases da gestora">
+          <p>Para cada frase, diga o grau, a cardinalidade máxima e a participação de cada lado:</p>
+          <ol>
+            <li>"Cada entregador leva vários pedidos por noite, e cada pedido sai com um entregador só."</li>
+            <li>"Toda pizza tem uma categoria; a categoria 'doces' hoje está sem nenhuma pizza cadastrada."</li>
+            <li>"Um pedido pode ser pago em dinheiro e em cartão ao mesmo tempo, dividindo a conta."</li>
+            <li>"Cada mesa do salão pode receber vários pedidos na mesma noite."</li>
+          </ol>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <ol>
+              <li>
+                Binário, <strong>1:N</strong> entre <code>funcionario</code> e <code>pedido</code>.
+                Pedido participa parcialmente (delivery ainda não despachado não tem entregador);
+                funcionário participa parcialmente (pizzaiolo nunca leva pedido).
+              </li>
+              <li>
+                Binário, <strong>1:N</strong> entre <code>categoria_produto</code> e
+                <code>produto</code>. Produto tem participação <strong>total</strong>
+                (<code>id_categoria NOT NULL</code>); categoria tem participação parcial, e a frase
+                sobre "doces" é exatamente a prova disso.
+              </li>
+              <li>
+                Binário, <strong>N:N</strong> entre <code>pedido</code> e
+                <code>forma_pagamento</code>, resolvido pela tabela <code>pagamento</code>, que ainda
+                guarda <code>vl_pago</code> — atributo do relacionamento.
+              </li>
+              <li>
+                Binário, <strong>1:N</strong> entre <code>mesa</code> e <code>pedido</code>, com
+                pedido em participação <strong>parcial</strong>: delivery não tem mesa.
+              </li>
+            </ol>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="básico" titulo="Descubra a cardinalidade lendo o DDL">
+          <p>
+            Sem ver diagrama nenhum, alguém te entrega este trecho. Que relacionamento ele
+            representa, com qual cardinalidade máxima e qual participação?
+          </p>
+          <sql-terminal banco="MODELAGEM" titulo="leia o DDL e responda" saida-oculta>
+            <script type="text/plain" slot="sql">CREATE TABLE bina (
+    id_bina     INT IDENTITY(1,1) NOT NULL,
+    nr_origem   VARCHAR(20)       NOT NULL,
+    dt_chamada  DATETIME2(0)      NOT NULL,
+    id_cliente  INT               NULL,
+    CONSTRAINT PK_bina         PRIMARY KEY (id_bina),
+    CONSTRAINT FK_bina_cliente FOREIGN KEY (id_cliente)
+        REFERENCES cliente (id_cliente)
+);
+GO</script>
+            <script type="text/plain" slot="saida">1:N entre cliente e bina.
+Participacao do lado bina: PARCIAL (id_cliente aceita NULL).
+Leitura: um cliente origina zero ou muitas chamadas;
+         uma chamada foi originada por zero ou um cliente.</script>
+          </sql-terminal>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito comentado</summary>
+            <p>
+              É <strong>1:N</strong> de <code>cliente</code> para <code>bina</code>. O detalhe que
+              vale a aula inteira é o <code>NULL</code> em <code>id_cliente</code>: o BINA registra
+              o número de quem ligou <em>antes</em> de saber se aquele número pertence a um cliente
+              cadastrado. Se a coluna fosse <code>NOT NULL</code>, o sistema não conseguiria
+              registrar a ligação de um número desconhecido — e é justamente essa ligação que
+              vira cadastro novo.
+            </p>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="intermediário" titulo="Prove a cardinalidade com dados">
+          <p>
+            No banco <code>MODELAGEM_UC10</code>, escreva uma consulta que mostre quantos pedidos
+            cada cliente fez, incluindo os clientes que não fizeram nenhum. O resultado precisa
+            provar, com dados, que a participação do cliente é parcial.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <sql-terminal banco="MODELAGEM" titulo="gabarito do exercício 03">
+              <script type="text/plain" slot="sql">INSERT INTO cliente (nm_cliente) VALUES ('Vitor Camargo');
+GO
+
+SELECT c.id_cliente,
+       c.nm_cliente,
+       COUNT(p.id_pedido) AS qt_pedidos
+  FROM cliente AS c
+  LEFT JOIN pedido AS p
+         ON p.id_cliente = c.id_cliente
+ GROUP BY c.id_cliente, c.nm_cliente
+ ORDER BY qt_pedidos DESC, c.nm_cliente;
+GO</script>
+              <script type="text/plain" slot="saida">id_cliente nm_cliente      qt_pedidos
+---------- --------------- -----------
+         1 Helena Duarte             1
+         2 Rafael Nunes              1
+         3 Vitor Camargo             0
+
+(3 rows affected)</script>
+            </sql-terminal>
+            <p class="mb-0">
+              A linha com <code>0</code> é a participação parcial visível. Com
+              <code>INNER JOIN</code> ela desapareceria, e o relatório mentiria dizendo que a
+              pizzaria tem dois clientes.
+            </p>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="intermediário" titulo="Quebre o N:N de propósito">
+          <p>
+            Insira dois itens do mesmo produto no mesmo pedido, em linhas separadas, e explique a
+            mensagem que o SQL Server devolve. Depois, corrija o insert respeitando o modelo.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <sql-terminal variant="erro" banco="MODELAGEM" titulo="a chave composta em ação">
+              <script type="text/plain" slot="sql">INSERT INTO produto (nm_produto) VALUES ('Pizza Calabresa'), ('Refrigerante 2L');
+GO
+
+INSERT INTO item_pedido (id_pedido, id_produto, qt_item, vl_unitario)
+VALUES (1, 1, 1, 54.90);
+
+INSERT INTO item_pedido (id_pedido, id_produto, qt_item, vl_unitario)
+VALUES (1, 1, 1, 54.90);
+GO</script>
+              <script type="text/plain" slot="saida">(2 rows affected)
+(1 row affected)
+Msg 2627, Level 14, State 1, Line 7
+Violation of PRIMARY KEY constraint 'PK_item_pedido'. Cannot insert duplicate key in object 'dbo.item_pedido'. The duplicate key value is (1, 1).
+The statement has been terminated.</script>
+            </sql-terminal>
+            <p>
+              A chave primária composta <code>(id_pedido, id_produto)</code> proíbe o mesmo produto
+              duas vezes no mesmo pedido. A forma correta de pedir duas calabresas é a quantidade:
+            </p>
+            <sql-terminal banco="MODELAGEM" titulo="correção">
+              <script type="text/plain" slot="sql">UPDATE item_pedido
+   SET qt_item = 2
+ WHERE id_pedido = 1
+   AND id_produto = 1;
+GO</script>
+              <script type="text/plain" slot="saida">(1 row affected)</script>
+            </sql-terminal>
+          </details>
+        </exercicio-item>
+
+        <exercicio-item nivel="desafio" titulo="Modele o ternário do preço">
+          <p>
+            Na Bella Massa o preço não é do produto: é do produto <em>em determinado tamanho</em>.
+            Uma calabresa broto custa diferente da calabresa família. Modele isso, escreva a leitura
+            nos dois sentidos e diga por que uma coluna <code>vl_preco</code> dentro de
+            <code>produto</code> não resolve.
+          </p>
+          <details class="uc-gabarito">
+            <summary>Ver gabarito</summary>
+            <p>
+              É um N:N entre <code>produto</code> e <code>tamanho</code>, e o preço é atributo do
+              relacionamento. A tabela associativa <code>produto_tamanho_preco</code> tem chave
+              primária composta pelas duas chaves estrangeiras:
+            </p>
+            <sql-terminal banco="MODELAGEM" titulo="gabarito do exercício 05">
+              <script type="text/plain" slot="sql">CREATE TABLE tamanho (
+    id_tamanho INT IDENTITY(1,1) NOT NULL,
+    nm_tamanho VARCHAR(20)       NOT NULL,
+    qt_fatias  TINYINT           NOT NULL,
+    CONSTRAINT PK_tamanho PRIMARY KEY (id_tamanho),
+    CONSTRAINT UQ_tamanho_nm UNIQUE (nm_tamanho)
+);
+
+CREATE TABLE produto_tamanho_preco (
+    id_produto INT          NOT NULL,
+    id_tamanho INT          NOT NULL,
+    vl_preco   DECIMAL(8,2) NOT NULL,
+    CONSTRAINT PK_produto_tamanho_preco PRIMARY KEY (id_produto, id_tamanho),
+    CONSTRAINT FK_ptp_produto FOREIGN KEY (id_produto) REFERENCES produto (id_produto),
+    CONSTRAINT FK_ptp_tamanho FOREIGN KEY (id_tamanho) REFERENCES tamanho (id_tamanho),
+    CONSTRAINT CK_ptp_vl_preco CHECK (vl_preco > 0)
+);
+GO
+
+INSERT INTO tamanho (nm_tamanho, qt_fatias) VALUES ('Broto', 4), ('Familia', 8);
+
+INSERT INTO produto_tamanho_preco (id_produto, id_tamanho, vl_preco)
+VALUES (1, 1, 32.00),
+       (1, 2, 54.90);
+GO</script>
+              <script type="text/plain" slot="saida">(2 rows affected)
+(2 rows affected)</script>
+            </sql-terminal>
+            <p class="mb-0">
+              Leitura: <em>um produto é vendido em zero ou muitos tamanhos; um tamanho vale para zero
+              ou muitos produtos</em>. Uma coluna <code>vl_preco</code> em <code>produto</code>
+              obrigaria a cadastrar "Calabresa broto" e "Calabresa família" como produtos diferentes,
+              duplicando nome, categoria e ingredientes — que é exatamente a anomalia que a aula 10
+              vai chamar de falha de normalização.
+            </p>
+          </details>
+        </exercicio-item>
+      </mao-na-massa>
+
+      <section id="erros-comuns" class="uc-erros">
+        <h2>Erros comuns</h2>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Msg 547</span>
+            <span class="uc-erro__titulo">Inserir o lado "muitos" antes do lado "um"</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              A cardinalidade não é só desenho: ela impõe uma <strong>ordem de inserção</strong>.
+              Como <code>pedido.id_cliente</code> aponta para <code>cliente</code>, não existe pedido
+              antes de existir o cliente.
+            </p>
+            <sql-terminal variant="erro" banco="MODELAGEM" titulo="FK violada na inserção">
+              <script type="text/plain" slot="sql">INSERT INTO pedido (id_cliente, id_mesa) VALUES (999, NULL);
+GO</script>
+              <script type="text/plain" slot="saida">Msg 547, Level 16, State 0, Line 1
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_pedido_cliente". The conflict occurred in database "MODELAGEM_UC10", table "dbo.cliente", column 'id_cliente'.
+The statement has been terminated.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> insira sempre do lado "um" para o lado "muitos" —
+            <code>cliente</code>, depois <code>pedido</code>, depois <code>item_pedido</code>. Todo
+            script deste site respeita essa ordem, e é por isso que ele roda de ponta a ponta num
+            banco vazio.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Msg 547</span>
+            <span class="uc-erro__titulo">Apagar o lado "um" com filhos vivos</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              O espelho do erro anterior. Excluir um cliente que já fez pedidos é proibido pela
+              própria cardinalidade: os pedidos ficariam órfãos, e a coluna
+              <code>id_cliente</code> é <code>NOT NULL</code>.
+            </p>
+            <sql-terminal variant="erro" banco="MODELAGEM" titulo="DELETE bloqueado pela referência">
+              <script type="text/plain" slot="sql">DELETE FROM cliente WHERE id_cliente = 1;
+GO</script>
+              <script type="text/plain" slot="saida">Msg 547, Level 16, State 0, Line 1
+The DELETE statement conflicted with the REFERENCE constraint "FK_pedido_cliente". The conflict occurred in database "MODELAGEM_UC10", table "dbo.pedido", column 'id_cliente'.
+The statement has been terminated.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> decida a regra de negócio antes de forçar. Apagar os pedidos
+            junto (<code>ON DELETE CASCADE</code>) destrói o histórico de vendas; o normal em
+            pizzaria é <strong>não apagar cliente nenhum</strong> e sim marcar
+            <code>fl_ativo = 0</code>. A aula 10 compara as três ações referenciais.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Msg 515</span>
+            <span class="uc-erro__titulo">Confundir cardinalidade mínima com máxima</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              "Um pedido tem uma mesa" foi lido como participação total e virou
+              <code>id_mesa NOT NULL</code>. O modelo passa a recusar todo pedido de delivery — que é
+              70% do faturamento.
+            </p>
+            <sql-terminal variant="erro" banco="MODELAGEM" titulo="o delivery que o modelo proibiu">
+              <script type="text/plain" slot="sql">-- suponha id_mesa declarado como NOT NULL
+INSERT INTO pedido (id_cliente, id_mesa) VALUES (2, NULL);
+GO</script>
+              <script type="text/plain" slot="saida">Msg 515, Level 16, State 2, Line 2
+Cannot insert the value NULL into column 'id_mesa', table 'MODELAGEM_UC10.dbo.pedido'; column does not allow nulls. INSERT fails.
+The statement has been terminated.</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> antes de escrever <code>NOT NULL</code>, leia o
+            relacionamento no sentido daquela tabela e procure o caso em que a resposta é "nenhum".
+            Se esse caso existe no negócio, a participação é parcial e a coluna aceita
+            <code>NULL</code>.
+          </div>
+        </article>
+
+        <article class="uc-erro">
+          <div class="uc-erro__cabecalho">
+            <span class="uc-erro__tag">Modelagem</span>
+            <span class="uc-erro__titulo">Chamar de 1:N o que é N:N por causa dos dados de hoje</span>
+          </div>
+          <div class="uc-erro__corpo">
+            <p>
+              Não dá mensagem de erro nenhuma — e é por isso que é o pior dos quatro. Como hoje todo
+              pedido tem um item só, o aluno modela <code>pedido.id_produto</code> e o banco aceita.
+              O problema aparece três meses depois, com dados em produção e a estrutura errada.
+            </p>
+            <sql-terminal variant="erro" banco="MODELAGEM" titulo="o modelo que só quebra no futuro">
+              <script type="text/plain" slot="sql">-- o modelo aceita isto sem reclamar:
+UPDATE pedido SET id_produto = 2 WHERE id_pedido = 1;
+GO
+-- o pedido 1 nao passou a ter dois produtos: ele TROCOU de produto.
+-- A calabresa que o cliente pediu desapareceu do historico.</script>
+              <script type="text/plain" slot="saida">(1 row affected)</script>
+            </sql-terminal>
+          </div>
+          <div class="uc-erro__correcao">
+            <strong>Correção:</strong> a cardinalidade descreve a <em>regra</em>, nunca a amostra de
+            dados. Pergunte sempre "isto <em>pode</em> acontecer?", não "isto acontece hoje?". Se a
+            gestora responde "pode", é N:N e leva tabela associativa desde o primeiro dia.
+          </div>
+        </article>
+      </section>
+
+      <checklist-aula id="checklist" chave="aula-06">
+        <script type="application/json">
+        [
+          "Classificar um relacionamento como unário, binário ou ternário",
+          "Decidir entre 1:1, 1:N e N:N a partir de uma frase do cliente",
+          "Dizer, para cada lado, se a participação é total ou parcial",
+          "Ler qualquer relacionamento em voz alta nos dois sentidos usando as quatro formas (zero ou muitos, um ou muitos, zero ou um, exatamente um)",
+          "Desenhar o relacionamento em notação de Chen com losango e cardinalidades",
+          "Desenhar o mesmo relacionamento em pé-de-galinha com os símbolos corretos",
+          "Colocar a chave estrangeira no lado certo em um 1:N",
+          "Criar a tabela associativa de um N:N com chave primária composta",
+          "Traduzir participação total e parcial em NOT NULL e NULL",
+          "Reconhecer os dois modelos errados: N:N sem associativa e atributo multivalorado em colunas repetidas"
+        ]
+        </script>
+      </checklist-aula>
+
+      <quiz-aula id="quiz" chave="aula-06">
+        <script type="application/json">
+        [
+          {
+            "pergunta": "A gestora diz: \"cada entregador leva vários pedidos na noite, e cada pedido sai com um entregador só\". Qual é a cardinalidade e onde fica a chave estrangeira?",
+            "alternativas": [
+              { "texto": "1:N de funcionário para pedido; a FK id_funcionario fica em pedido.", "certa": true, "feedback": "Correto. No 1:N a chave estrangeira sempre mora no lado muitos, que aqui é pedido. Assim cada pedido aponta para um entregador, e um entregador é apontado por muitos pedidos." },
+              { "texto": "1:N de funcionário para pedido; a FK id_pedido fica em funcionario.", "certa": false, "feedback": "Se a FK ficasse em funcionario, cada funcionário caberia em um pedido só — exatamente o contrário da regra. Esse é o erro mais comum ao traduzir 1:N." },
+              { "texto": "N:N; precisa de tabela associativa entrega_pedido.", "certa": false, "feedback": "Só seria N:N se o mesmo pedido pudesse sair com vários entregadores ao mesmo tempo. A frase diz explicitamente \"um entregador só\"." },
+              { "texto": "1:1; cada pedido tem um entregador.", "certa": false, "feedback": "1:1 exigiria que cada entregador levasse no máximo um pedido em toda a vida. A frase diz \"vários pedidos na noite\", então o lado do pedido é N." }
+            ]
+          },
+          {
+            "pergunta": "No modelo da pizzaria, id_cliente em pedido é NOT NULL e id_mesa é NULL. O que isso descreve?",
+            "alternativas": [
+              { "texto": "Participação total do pedido no relacionamento com cliente e parcial no relacionamento com mesa.", "certa": true, "feedback": "Correto. NOT NULL é a tradução literal de cardinalidade mínima 1, e NULL é a tradução de cardinalidade mínima 0. Delivery não tem mesa, mas todo pedido tem dono." },
+              { "texto": "Que a tabela cliente é mais importante que a tabela mesa.", "certa": false, "feedback": "Nulidade não expressa importância, e sim obrigatoriedade da relação. As duas tabelas têm o mesmo peso no modelo." },
+              { "texto": "Que o relacionamento com cliente é 1:1 e o com mesa é 1:N.", "certa": false, "feedback": "Nulidade é cardinalidade mínima; ela não diz nada sobre a máxima. Os dois relacionamentos são 1:N — o que muda é se o lado é obrigatório." },
+              { "texto": "Que id_mesa não tem chave estrangeira.", "certa": false, "feedback": "Uma FK pode perfeitamente aceitar NULL. Quando o valor é NULL a restrição simplesmente não é verificada; quando há valor, ele precisa existir em mesa." }
+            ]
+          },
+          {
+            "pergunta": "Por que a chave primária de item_pedido é (id_pedido, id_produto) e não uma coluna id_item com IDENTITY?",
+            "alternativas": [
+              { "texto": "Porque a chave composta impede fisicamente o mesmo produto de aparecer duas vezes no mesmo pedido.", "certa": true, "feedback": "Correto. A chave composta é a regra de negócio virando estrutura: duas calabresas são qt_item = 2, não duas linhas. Com id_item artificial, seria preciso uma UNIQUE sobre as duas colunas para obter a mesma garantia." },
+              { "texto": "Porque o SQL Server não aceita IDENTITY em tabelas associativas.", "certa": false, "feedback": "Aceita sem problema. A escolha aqui é de modelagem, não uma limitação do produto." },
+              { "texto": "Porque chaves compostas são sempre mais rápidas que chaves simples.", "certa": false, "feedback": "Desempenho depende do índice, do tamanho da chave e do padrão de consulta. A razão para a chave composta aqui é semântica, não de velocidade." },
+              { "texto": "Porque toda tabela com duas chaves estrangeiras precisa ter chave primária composta.", "certa": false, "feedback": "Não existe essa obrigação. Uma tabela pode ter várias FKs e uma PK própria; o que decide é a regra de unicidade do negócio." }
+            ]
+          },
+          {
+            "pergunta": "Qual leitura descreve corretamente CLIENTE ||--o{ PEDIDO nos dois sentidos?",
+            "alternativas": [
+              { "texto": "Um cliente faz zero ou muitos pedidos; um pedido é feito por exatamente um cliente.", "certa": true, "feedback": "Correto. A barra dupla do lado do cliente é exatamente um; o círculo com pé-de-galinha do lado do pedido é zero ou muitos. Ler nos dois sentidos é o teste que valida o modelo com quem entende do negócio." },
+              { "texto": "Um cliente faz exatamente um pedido; um pedido pode ter muitos clientes.", "certa": false, "feedback": "Isso inverte os dois lados. O símbolo de pé-de-galinha está em PEDIDO, então é o pedido que aparece em quantidade." },
+              { "texto": "Um cliente faz um ou muitos pedidos; um pedido é feito por um ou muitos clientes.", "certa": false, "feedback": "O círculo (o) antes do pé-de-galinha significa zero como mínimo, não um. E o lado do cliente é ||, que é exatamente um, nunca muitos." },
+              { "texto": "Um cliente pode não existir sem pedido; um pedido pode existir sem cliente.", "certa": false, "feedback": "É o oposto do modelo. Cliente existe sem nunca ter pedido; pedido sem cliente é impossível, porque id_cliente é NOT NULL." }
+            ]
+          },
+          {
+            "pergunta": "A tabela cliente tem telefone1, telefone2 e telefone3. Qual é o problema estrutural?",
+            "alternativas": [
+              { "texto": "É um atributo multivalorado espalhado em colunas: limita a quantidade, gera nulos e complica a busca.", "certa": true, "feedback": "Correto. O quarto telefone exigiria ALTER TABLE, a maioria das linhas fica com NULL e procurar um número obriga a testar três colunas com OR. A solução é a entidade telefone_cliente em 1:N." },
+              { "texto": "Nenhum: três colunas são mais rápidas que uma tabela extra.", "certa": false, "feedback": "Ainda que uma leitura evite o JOIN, o modelo passa a mentir sobre o negócio e a impedir o quarto telefone. Corretude de modelo vem antes de micro-otimização." },
+              { "texto": "O problema é o tipo VARCHAR; telefone deveria ser BIGINT.", "certa": false, "feedback": "Telefone não é número de cálculo: tem zero à esquerda, parênteses e traço, e ninguém soma dois telefones. VARCHAR é a escolha certa. O problema aqui é de estrutura, não de tipo." },
+              { "texto": "Faltou colocar as três colunas como NOT NULL.", "certa": false, "feedback": "Isso pioraria: obrigaria todo cliente a informar exatamente três telefones. Os nulos são consequência do modelo errado, não a doença em si." }
+            ]
+          }
+        ]
+        </script>
+      </quiz-aula>
+
+      <div id="app-script"></div>
+    </article>
+
+    <div id="app-prevnext"></div>
+  </main>
+
+  <div id="app-rodape"></div>
+</div>
+
+<script type="module" src="../assets/js/main.js"></script>
+</body>
+</html>
